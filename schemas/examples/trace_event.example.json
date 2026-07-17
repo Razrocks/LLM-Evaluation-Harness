@@ -1,0 +1,13 @@
+{
+  "event_id": "evt_0001",
+  "case_execution_id": "ce_request_triage_001",
+  "sequence": 0,
+  "event_type": "invocation_started",
+  "actor": "harness.orchestrator",
+  "timestamp": "2026-07-17T00:00:00+00:00",
+  "input_refs": ["case:request_triage_001@1"],
+  "output_refs": [],
+  "state_transition": { "from": "PENDING", "to": "INVOKING" },
+  "payload_ref": "artifact://runs/run_x/raw/ce_request_triage_001.request.json",
+  "content_hash": "sha256:abc"
+}

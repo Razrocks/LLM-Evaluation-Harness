@@ -1,0 +1,44 @@
+{
+  "run_id": "run_2026-07-17T00-00-00Z_a1b2c3",
+  "repo_revision": "df56262",
+  "eval_plan_id": "reference_request_triage_baseline",
+  "eval_plan_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "workflow_ref": "reference.request_triage.v1",
+  "dataset_release_id": "reference.request_triage.dataset.v1",
+  "dataset_release_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "case_refs": [
+    { "case_id": "request_triage_001", "case_version": 1 }
+  ],
+  "target_adapter": {
+    "adapter_id": "recorded_pass",
+    "adapter_version": "v1",
+    "config_refs": {}
+  },
+  "prompt_spec_id": null,
+  "prompt_spec_hash": null,
+  "model_config": null,
+  "output_schema_id": "request_triage.output.v1",
+  "output_schema_hash": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "retrieval_config_id": null,
+  "retrieval_config_hash": null,
+  "scoring_plan_id": "reference_request_triage_scoring.v1",
+  "scoring_plan_hash": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+  "scorer_versions": {
+    "schema_valid.v1": "1",
+    "normalized_date_equal.v1": "1",
+    "categorical_equal.v1": "1",
+    "set_precision_recall_f1.v1": "1"
+  },
+  "gate_id": "reference_request_triage_v1_ci",
+  "gate_hash": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+  "baseline_id": null,
+  "baseline_run_id": null,
+  "price_table_id": null,
+  "price_table_hash": null,
+  "random_seed": null,
+  "timeout_retry_config": { "timeout_s": 60, "max_attempts": 1 },
+  "environment": { "python": "3.12.4", "platform": "win32" },
+  "created_at": "2026-07-17T00:00:00+00:00",
+  "completed_at": "2026-07-17T00:00:01+00:00",
+  "status": "completed"
+}
