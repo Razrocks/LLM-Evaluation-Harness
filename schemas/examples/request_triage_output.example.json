@@ -1,0 +1,40 @@
+{
+  "summary": "Invoice submitted exceeds the approved quote; requester asks for a response by Friday.",
+  "tasks": [
+    {
+      "task_id": "t1",
+      "description": "Review invoice against approved quote and respond to requester.",
+      "owner_role": "accounts_payable",
+      "due_date": "2026-07-17",
+      "evidence_refs": ["message#span-1"]
+    }
+  ],
+  "deadline": {
+    "date": "2026-07-17",
+    "kind": "explicit_relative",
+    "evidence_refs": ["message#span-1"]
+  },
+  "risk_level": "high",
+  "risk_reasons": [
+    {
+      "code": "amount_conflict",
+      "description": "Invoiced amount (CAD 4,800) exceeds approved quote (CAD 3,200).",
+      "evidence_refs": ["quote_001#span-1", "invoice_001#span-1"]
+    }
+  ],
+  "missing_information": [
+    {
+      "key": "amount_or_scope_breakdown",
+      "label": "Line-item / scope breakdown",
+      "reason": "No breakdown explains the CAD 1,600 difference between quote and invoice.",
+      "evidence_refs": ["invoice_001#span-1"]
+    }
+  ],
+  "needs_attention": true,
+  "material_claims": [
+    {
+      "claim": "The invoiced amount exceeds the approved quote by CAD 1,600.",
+      "evidence_refs": ["quote_001#span-1", "invoice_001#span-1"]
+    }
+  ]
+}
