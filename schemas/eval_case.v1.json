@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-eval/schemas/eval_case.v1.json",
+  "title": "eval_case.v1",
+  "description": "One versioned evaluation scenario: input, source context, expected values, atomic assertions, provenance, and review state. An APPROVED case version is immutable; corrections create a new case_version.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "case_version",
+    "workflow_ref",
+    "input",
+    "expected",
+    "assertions",
+    "provenance",
+    "review"
+  ],
+  "properties": {
+    "case_id": { "type": "string", "minLength": 1 },
+    "case_version": { "type": "integer", "minimum": 1 },
+    "workflow_ref": {
+      "type": "string",
+      "description": "e.g. reference.request_triage.v1",
+      "minLength": 1
+    },
+    "title": { "type": "string" },
+    "input": {
+      "type": "object",
+      "description": "Workflow input payload; validated against the workflow's input schema (request_triage.input.v1 for the first slice)."
+    },
+    "source_context": {
+      "type": "array",
+      "description": "Authoritative evidence made available to the target, resolvable by assertions.",
+      "items": { "$ref": "#/$defs/evidence_unit" }
+    },
+    "expected": {
+      "type": "object",
+      "description": "Human-approved or deterministically derived expected values referenced by assertions."
+    },
+    "assertions": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "assertion.v1.json" }
+    },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "difficulty": {
+      "type": "string",
+      "enum": ["easy", "standard", "hard", "adversarial"],
+      "default": "standard"
+    },
+    "criticality": {
+      "type": "string",
+      "enum": ["normal", "critical"],
+      "default": "normal"
+    },
+    "ambiguity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "is_ambiguous": { "type": "boolean", "default": false },
+        "notes": { "type": ["string", "null"] },
+        "accepted_alternatives": { "type": "array", "items": {} }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["origin", "author_id"],
+      "properties": {
+        "origin": { "type": "string", "enum": ["synthetic", "public", "derived"] },
+        "author_id": { "type": "string", "minLength": 1 },
+        "created_at": { "type": ["string", "null"], "format": "date-time" }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["draft", "in_review", "approved", "deprecated"]
+        },
+        "reviewer_id": { "type": ["string", "null"] },
+        "reviewed_at": { "type": ["string", "null"], "format": "date-time" },
+        "rationale": { "type": ["string", "null"] }
+      }
+    },
+    "content_hash": {
+      "type": ["string", "null"],
+      "description": "sha256 over the canonical case body (excluding this field). Set when the case version is finalized."
+    }
+  },
+  "$defs": {
+    "evidence_unit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_id", "source_id"],
+      "properties": {
+        "evidence_id": { "type": "string", "minLength": 1 },
+        "source_id": {
+          "type": "string",
+          "description": "Identifier of the source artifact, e.g. 'message' or a document_id.",
+          "minLength": 1
+        },
+        "start": { "type": ["integer", "null"], "minimum": 0 },
+        "end": { "type": ["integer", "null"], "minimum": 0 },
+        "text": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

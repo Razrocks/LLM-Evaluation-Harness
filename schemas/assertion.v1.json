@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-eval/schemas/assertion.v1.json",
+  "title": "assertion.v1",
+  "description": "One atomic, typed claim about required or prohibited target behavior. Every assertion maps to exactly one versioned scorer and declares how an unevaluable case is handled.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["assertion_id", "type", "scorer_ref", "required", "severity", "on_unevaluable"],
+  "properties": {
+    "assertion_id": { "type": "string", "minLength": 1 },
+    "type": {
+      "type": "string",
+      "enum": [
+        "schema_valid",
+        "normalized_date_equal",
+        "deadline_kind_equal",
+        "categorical_equal",
+        "boolean_equal",
+        "set_precision_recall_f1",
+        "required_task_coverage",
+        "evidence_reference_valid",
+        "evidence_span_support",
+        "unsupported_material_claim_absent",
+        "prohibited_value_absent",
+        "semantic_equivalence_judge"
+      ]
+    },
+    "scorer_ref": {
+      "type": "string",
+      "description": "Immutable scorer reference including version, e.g. 'normalized_date_equal.v1'.",
+      "minLength": 1
+    },
+    "observed_selector": {
+      "type": ["string", "null"],
+      "description": "JSONPath-like selector into the parsed candidate output, e.g. '$.deadline.date'. Null for whole-output assertions such as schema_valid."
+    },
+    "expected": {
+      "description": "Expected value or predicate operand. Type depends on assertion type; may be null.",
+      "type": ["string", "number", "boolean", "array", "object", "null"]
+    },
+    "params": {
+      "type": "object",
+      "description": "Scorer-specific configuration (e.g. minimum_recall, prohibited items, alias map ref). Bounded per scorer at load time.",
+      "additionalProperties": true
+    },
+    "required": { "type": "boolean" },
+    "weight": { "type": "number", "minimum": 0, "default": 1.0 },
+    "severity": {
+      "type": "string",
+      "enum": ["critical", "major", "minor", "informational"]
+    },
+    "pass_threshold": {
+      "type": "number",
+      "description": "Minimum score for a pass. Defaults to 1.0 for boolean-style scorers.",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "evidence_requirement": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["none", "source_reference_required", "source_span_required"]
+        },
+        "observed_selector": { "type": ["string", "null"] }
+      },
+      "required": ["type"]
+    },
+    "on_unevaluable": {
+      "type": "string",
+      "enum": ["fail", "skip", "error"],
+      "description": "What to record when the assertion cannot be evaluated (e.g. missing parsed output)."
+    }
+  }
+}

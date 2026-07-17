@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-eval/schemas/gate_policy.v1.json",
+  "title": "gate_policy.v1",
+  "description": "A deterministic, versioned collection of rules that accept, reject, or invalidate a candidate run. Thresholds live in data, never in code. Rules are evaluated in a fixed precedence order: invalid/incomplete run, then critical-case rules, then absolute floors, then baseline deltas, then operational limits.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["gate_id", "gate_version", "rules"],
+  "properties": {
+    "gate_id": { "type": "string", "minLength": 1 },
+    "gate_version": { "type": "string", "minLength": 1 },
+    "description": { "type": "string" },
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/rule" }
+    }
+  },
+  "$defs": {
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule_id", "type"],
+      "properties": {
+        "rule_id": { "type": "string", "minLength": 1 },
+        "type": {
+          "type": "string",
+          "enum": [
+            "critical_case_count_max",
+            "metric_minimum",
+            "metric_maximum",
+            "baseline_delta_minimum",
+            "baseline_delta_maximum",
+            "required_metric_present"
+          ]
+        },
+        "metric": {
+          "type": ["string", "null"],
+          "description": "Metric name this rule applies to (null for critical_case_count_max)."
+        },
+        "minimum": { "type": ["number", "null"] },
+        "maximum": { "type": ["number", "null"] },
+        "minimum_delta": { "type": ["number", "null"] },
+        "maximum_delta": { "type": ["number", "null"] },
+        "requires_baseline": { "type": "boolean", "default": false },
+        "min_sample_size": { "type": ["integer", "null"], "minimum": 1 },
+        "severity": {
+          "type": "string",
+          "enum": ["critical", "major", "minor"],
+          "default": "major",
+          "description": "critical rules are safety/promotion blockers evaluated before quality floors."
+        }
+      }
+    }
+  }
+}

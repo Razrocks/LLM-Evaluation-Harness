@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-eval/schemas/reference/request_triage_output.v1.json",
+  "title": "request_triage.output.v1",
+  "description": "Canonical structured output contract for reference.request_triage.v1. Field names are shared verbatim by cases, scorers, reports, and (later) API/dashboard. Model self-confidence is deliberately NOT part of this trusted contract.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "summary",
+    "tasks",
+    "deadline",
+    "risk_level",
+    "risk_reasons",
+    "missing_information",
+    "needs_attention",
+    "material_claims"
+  ],
+  "properties": {
+    "summary": { "type": "string" },
+    "tasks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/task" }
+    },
+    "deadline": { "$ref": "#/$defs/deadline" },
+    "risk_level": { "$ref": "#/$defs/risk_level" },
+    "risk_reasons": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/risk_reason" }
+    },
+    "missing_information": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/missing_information_item" }
+    },
+    "needs_attention": { "type": "boolean" },
+    "material_claims": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/material_claim" }
+    }
+  },
+  "$defs": {
+    "source_ref": {
+      "type": "string",
+      "description": "Reference to an evidence unit, e.g. 'message#span-1' or 'quote_001#span-1'.",
+      "minLength": 1
+    },
+    "iso_date_or_null": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["task_id", "description", "owner_role", "due_date", "evidence_refs"],
+      "properties": {
+        "task_id": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "owner_role": { "type": ["string", "null"] },
+        "due_date": { "$ref": "#/$defs/iso_date_or_null" },
+        "evidence_refs": { "type": "array", "items": { "$ref": "#/$defs/source_ref" } }
+      }
+    },
+    "deadline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["date", "kind", "evidence_refs"],
+      "properties": {
+        "date": { "$ref": "#/$defs/iso_date_or_null" },
+        "kind": {
+          "type": "string",
+          "enum": ["explicit_absolute", "explicit_relative", "inferred", "none", "ambiguous"]
+        },
+        "evidence_refs": { "type": "array", "items": { "$ref": "#/$defs/source_ref" } }
+      }
+    },
+    "risk_reason": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "description", "evidence_refs"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "evidence_refs": { "type": "array", "items": { "$ref": "#/$defs/source_ref" } }
+      }
+    },
+    "missing_information_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "label", "reason", "evidence_refs"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Controlled canonical key from the missing-information vocabulary.",
+          "minLength": 1
+        },
+        "label": { "type": "string" },
+        "reason": { "type": "string" },
+        "evidence_refs": { "type": "array", "items": { "$ref": "#/$defs/source_ref" } }
+      }
+    },
+    "material_claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["claim", "evidence_refs"],
+      "properties": {
+        "claim": { "type": "string" },
+        "evidence_refs": { "type": "array", "items": { "$ref": "#/$defs/source_ref" } }
+      }
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-eval/schemas/reference/trace_event.v1.json",
+  "title": "trace_event.v1",
+  "description": "One ordered material event emitted by a target or the harness during a case execution. Payloads are redacted or stored by reference; the trace itself is append-only evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "case_execution_id", "sequence", "event_type", "actor", "timestamp"],
+  "properties": {
+    "event_id": { "type": "string", "minLength": 1 },
+    "case_execution_id": { "type": "string", "minLength": 1 },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "event_type": {
+      "type": "string",
+      "description": "Typed event, e.g. invocation_started, response_received, invocation_error, parse_started, parse_completed, scoring_started, scoring_completed. Agent workloads (M8) add skill_selected, policy_checked, etc.",
+      "minLength": 1
+    },
+    "actor": {
+      "type": "string",
+      "description": "Component or system that emitted the event, e.g. 'harness.orchestrator' or 'target.recorded_pass.v1'.",
+      "minLength": 1
+    },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "input_refs": { "type": "array", "items": { "type": "string" } },
+    "output_refs": { "type": "array", "items": { "type": "string" } },
+    "state_transition": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "from": { "type": ["string", "null"] },
+        "to": { "type": ["string", "null"] }
+      }
+    },
+    "payload_ref": {
+      "type": ["string", "null"],
+      "description": "Reference to a stored artifact holding the (possibly large or redacted) payload."
+    },
+    "content_hash": { "type": ["string", "null"] }
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-eval/schemas/run_manifest.v1.json",
+  "title": "run_manifest.v1",
+  "description": "Content-addressed snapshot of every resolved input required to reproduce a run. A publishable run MUST NOT contain floating references (no 'latest', no mutable aliases). No credentials or secret values are ever stored here.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "run_id",
+    "eval_plan_id",
+    "eval_plan_hash",
+    "workflow_ref",
+    "dataset_release_id",
+    "dataset_release_hash",
+    "case_refs",
+    "target_adapter",
+    "output_schema_id",
+    "output_schema_hash",
+    "scoring_plan_id",
+    "scoring_plan_hash",
+    "scorer_versions",
+    "created_at",
+    "status"
+  ],
+  "properties": {
+    "run_id": { "type": "string", "minLength": 1 },
+    "repo_revision": { "type": ["string", "null"] },
+    "eval_plan_id": { "type": "string", "minLength": 1 },
+    "eval_plan_hash": { "type": "string", "minLength": 1 },
+    "workflow_ref": { "type": "string", "minLength": 1 },
+    "dataset_release_id": { "type": "string", "minLength": 1 },
+    "dataset_release_hash": { "type": "string", "minLength": 1 },
+    "case_refs": {
+      "type": "array",
+      "description": "Exact case_id + case_version pairs included in this run.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["case_id", "case_version"],
+        "properties": {
+          "case_id": { "type": "string", "minLength": 1 },
+          "case_version": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "target_adapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adapter_id", "adapter_version"],
+      "properties": {
+        "adapter_id": { "type": "string", "minLength": 1 },
+        "adapter_version": { "type": "string", "minLength": 1 },
+        "config_refs": { "type": "object" }
+      }
+    },
+    "prompt_spec_id": { "type": ["string", "null"] },
+    "prompt_spec_hash": { "type": ["string", "null"] },
+    "model_config": {
+      "type": ["object", "null"],
+      "description": "Model/classifier/provider configuration when applicable (null for recorded targets)."
+    },
+    "output_schema_id": { "type": "string", "minLength": 1 },
+    "output_schema_hash": { "type": "string", "minLength": 1 },
+    "retrieval_config_id": { "type": ["string", "null"] },
+    "retrieval_config_hash": { "type": ["string", "null"] },
+    "scoring_plan_id": { "type": "string", "minLength": 1 },
+    "scoring_plan_hash": { "type": "string", "minLength": 1 },
+    "scorer_versions": {
+      "type": "object",
+      "description": "Map of scorer_ref -> version string for every scorer used.",
+      "additionalProperties": { "type": "string" }
+    },
+    "gate_id": { "type": ["string", "null"] },
+    "gate_hash": { "type": ["string", "null"] },
+    "baseline_id": { "type": ["string", "null"] },
+    "baseline_run_id": { "type": ["string", "null"] },
+    "price_table_id": { "type": ["string", "null"] },
+    "price_table_hash": { "type": ["string", "null"] },
+    "random_seed": { "type": ["integer", "null"] },
+    "timeout_retry_config": { "type": ["object", "null"] },
+    "environment": {
+      "type": "object",
+      "description": "Safe-to-record environment metadata (python version, platform). Never secrets.",
+      "additionalProperties": true
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "completed_at": { "type": ["string", "null"], "format": "date-time" },
+    "status": {
+      "type": "string",
+      "enum": ["created", "queued", "running", "scoring", "completed", "failed", "cancelled"]
+    }
+  }
+}

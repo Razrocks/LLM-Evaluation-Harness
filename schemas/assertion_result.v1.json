@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-eval/schemas/assertion_result.v1.json",
+  "title": "assertion_result.v1",
+  "description": "The outcome of evaluating one assertion against one candidate output. Every assertion produces exactly one result; none are silently omitted.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["assertion_id", "scorer_ref", "status", "score"],
+  "properties": {
+    "assertion_id": { "type": "string", "minLength": 1 },
+    "scorer_ref": { "type": "string", "minLength": 1 },
+    "status": {
+      "type": "string",
+      "enum": ["pass", "fail", "unevaluable", "error"]
+    },
+    "score": {
+      "type": ["number", "null"],
+      "description": "Normalized score in [0,1]; null when status is error/unevaluable and no score applies."
+    },
+    "threshold": { "type": ["number", "null"] },
+    "expected": { "type": ["string", "number", "boolean", "array", "object", "null"] },
+    "observed": { "type": ["string", "number", "boolean", "array", "object", "null"] },
+    "normalization": {
+      "type": "array",
+      "description": "Ordered record of normalization operations applied (each an evidence-bearing note).",
+      "items": { "type": "object" }
+    },
+    "evidence": {
+      "type": "array",
+      "description": "Evidence supporting this result (expected/observed values, source spans, trace refs).",
+      "items": { "type": "object" }
+    },
+    "failure_codes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Controlled failure taxonomy codes when status is fail/error."
+    },
+    "severity": {
+      "type": ["string", "null"],
+      "enum": ["critical", "major", "minor", "informational", null]
+    },
+    "duration_ms": { "type": ["number", "null"], "minimum": 0 },
+    "metadata": { "type": "object" }
+  }
+}
