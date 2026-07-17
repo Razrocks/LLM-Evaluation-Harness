@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# Tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Runtime eval artifacts (generated runs are not committed; fixtures live under tests/ and datasets/)
+runs/
+!runs/.gitkeep
+
+# Editor / OS / local agent config
+.claude/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# uv
+uv.lock.tmp
