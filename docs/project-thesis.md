@@ -1,60 +1,92 @@
 # Project Thesis
 
-## Thesis
+## The problem
 
-AI workflow reliability is a **versioned, evidence-backed software quality problem**, not a
-prompt-tuning problem.
+AI workflows ship on vibes. A prompt is tuned until a handful of hand-tried examples look good,
+the demo works, and the thing goes to production. Then a "small" prompt change, a model version
+bump, or a new document format quietly degrades one behavior in ten — and nobody notices until a
+deadline is missed, a high-risk item is waved through, or an invented number reaches a customer.
 
-The platform converts an AI workflow from:
+The root cause is that probabilistic systems are treated as if they were deterministic: tested
+once, trusted forever. But the same input can produce different output, "good" is undefined, and
+there is no frozen population of reviewed cases to measure against. Traditional software has unit
+tests, regression suites, and release gates. Most AI workflows have none of the equivalents.
 
-> "It usually gives a good answer."
+## The thesis
 
-into:
+> **AI workflow reliability is a versioned, evidence-backed software quality problem — not a
+> prompt-tuning problem.**
 
-> "This exact workflow configuration ran against this exact immutable dataset release, under
-> these exact schemas, prompts/configs, scorers, and thresholds; every result retained raw
-> evidence; the candidate met or failed declared quality, safety, latency, and cost rules;
-> and the comparison is reproducible."
+The behavior of an AI workflow becomes governable the moment it can be *specified, measured,
+reproduced, reviewed, compared, and gated.* That requires six things working together, and the
+platform provides all six:
+
+1. **Approved datasets** — frozen, reviewed cases with atomic expected claims.
+2. **Explicit contracts** — versioned input/output schemas the output must satisfy.
+3. **Deterministic scoring** — rules, not opinions, wherever correctness is a rule.
+4. **Trace-based evidence** — every score resolves to the source span or event that justifies it.
+5. **Configuration comparison** — full resolved manifests, so comparisons are fair and repeatable.
+6. **Regression thresholds** — a deterministic gate that blocks promotion on a real regression.
+
+## The shift it forces
+
+The platform converts a claim from the left column into a claim from the right column:
+
+| Vibes | Evidence |
+|---|---|
+| "It usually gives a good answer." | "This configuration passed 30/30 approved cases." |
+| "The new prompt seems fine." | "Missing-information recall fell 0.92→0.71 on 8 named cases." |
+| "This model is better." | "Same release, same scorers: +3% schema, −7% high-risk recall, −40% latency." |
+| "It doesn't hallucinate." | "Unsupported-material-claim rate 0.00 over 30 cases; 2 invalid evidence refs." |
+| "Ship it." | "Gate PASS: all critical rules met, no regression vs approved baseline v1." |
 
 ## One-sentence definition
 
 A standalone evaluation platform that ships with reference workloads, executes AI systems
-against versioned cases, scores outputs and traces using deterministic and controlled
-semantic methods, preserves evidence, compares configurations, and enforces regression gates.
+against versioned cases, scores outputs and traces using deterministic and controlled semantic
+methods, preserves evidence, compares configurations, and enforces regression gates.
 
-## Why it exists
+## Why it must start narrow
 
-It prevents: ontology drift; undefined success criteria; vague prompts standing in for
-contracts; fake multi-agent architecture; untraceable model behavior; accidental scope
-expansion; "AI wrapper" thinking; mutable or unverifiable ground truth; dashboards whose
-metrics cannot be explained; and rebuilding evaluation logic for every workflow.
+A generic "evaluate any AI" platform, built first, reliably produces heavy configuration, weak
+semantics, and a dashboard reporting numbers nobody validated. So the thesis is proven on **one
+concrete workload** — Structured Request Triage — end to end, before anything widens. The
+discipline is captured in [adr/0001](adr/0001-domain-specific-first-slice.md): do not widen until
+the first slice is green.
 
-## Core design principle
+## What the platform owns — and does not
 
-The platform does **not** own production business execution. It owns **evaluation definition,
-reference workloads, sandbox execution, execution evidence, scoring, comparison, and gating.**
-External applications are optional targets, never prerequisites.
+**Owns:** evaluation definition, reference workloads, sandbox execution, execution evidence,
+scoring, comparison, and gating.
+**Does not own:** production business execution, identity, authorization, live pricing, or any
+real side effect. External applications are *optional targets*, never prerequisites. See
+[system-boundary.md](system-boundary.md).
 
-## Reference workloads (all run without an external app)
+## Reference workloads
 
-| Workload | Purpose | Milestone |
+All four run without an external application. Each exercises a different evaluation class using
+the *same* contracts.
+
+| Workload | Evaluation class it proves | Milestone |
 |---|---|---|
-| `reference.request_triage.v1` | Structured extraction: summary, tasks, deadline, risk, missing info, attention, evidence. | **M0–M4 (first slice)** |
-| `reference.grounded_qa.v1` | Chunking, embeddings, Qdrant retrieval, grounded answer + retrieval/generation attribution. | M7 |
-| `reference.governed_tool_use.v1` | Skill selection, policy outcome, approval, tool proposals, sandbox execution gates, trace. | M8 |
-| `reference.risk_classification.v1` | Deterministic rules vs CatBoost vs HuggingFace transformer vs LLM on frozen splits. | M9 |
+| `reference.request_triage.v1` | Structured extraction: dates, risk, missing info, tasks, evidence. | **M0–M4 (first slice)** |
+| `reference.grounded_qa.v1` | Retrieval + grounded generation, separately attributed. | M7 |
+| `reference.governed_tool_use.v1` | Agentic skill/tool selection, policy, approval, escalation. | M8 |
+| `reference.risk_classification.v1` | Method bake-off: rules vs CatBoost vs HuggingFace transformer vs LLM. | M9 |
+
+The same provider-neutral target contract evaluates **Claude, ChatGPT, Gemini, and local
+HuggingFace models** identically (M5); **CatBoost** and a **HuggingFace transformer classifier**
+join as ML baselines compared against LLMs on the same held-out labels (M9). See
+[technology-map.md](technology-map.md).
 
 ## The proof
 
-The first proof is **not** that the platform can call many models. It is that the platform
-**catches one meaningful structured-output regression, preserves the evidence, explains the
-failure, and blocks promotion under a deterministic contract.** The complete proof is that the
-same standalone contracts also evaluate retrieval, grounded generation, governed tool use,
-classifiers, cost, latency, and regressions — without requiring another product.
+The first proof is deliberately humble and deliberately hard to fake:
 
-## Model coverage (targets under test)
+> The platform catches **one** meaningful structured-output regression, preserves the evidence,
+> explains exactly why it failed, and blocks promotion under a deterministic contract.
 
-The same provider-neutral target-adapter contract evaluates **Claude (Anthropic), ChatGPT
-(OpenAI), Gemini (Google), and local HuggingFace models** identically (M5), plus **CatBoost**
-and a **HuggingFace transformer classifier** as ML baselines compared against LLMs on the same
-held-out labels (M9). See [technology-map.md](technology-map.md).
+The complete proof is that the *same standalone contracts* also evaluate retrieval, grounded
+generation, governed tool use, classifiers, cost, latency, and regressions — without ever
+requiring another product. Not "we can call many models," but "we can prove, case by case,
+whether a configuration got better or worse."
