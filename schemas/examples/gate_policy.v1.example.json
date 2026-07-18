@@ -1,0 +1,13 @@
+{
+  "gate_id": "reference_request_triage_v1_ci",
+  "gate_version": "1.0.0",
+  "description": "First-slice deterministic regression gate for reference.request_triage.v1.",
+  "rules": [
+    { "rule_id": "no_critical_case_failures", "type": "critical_case_count_max", "metric": null, "maximum": 0, "severity": "critical" },
+    { "rule_id": "schema_floor", "type": "metric_minimum", "metric": "schema_pass_rate", "minimum": 0.95, "severity": "critical" },
+    { "rule_id": "high_risk_recall_floor", "type": "metric_minimum", "metric": "risk_recall.high", "minimum": 0.95, "severity": "critical" },
+    { "rule_id": "deadline_accuracy_floor", "type": "metric_minimum", "metric": "deadline_accuracy", "minimum": 0.90, "severity": "major" },
+    { "rule_id": "missing_info_recall_floor", "type": "metric_minimum", "metric": "missing_information_recall", "minimum": 0.85, "severity": "major" },
+    { "rule_id": "missing_info_regression", "type": "baseline_delta_minimum", "metric": "missing_information_recall", "minimum_delta": -0.03, "requires_baseline": true, "severity": "major" }
+  ]
+}

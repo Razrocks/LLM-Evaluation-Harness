@@ -1,0 +1,19 @@
+{
+  "assertion_id": "deadline_exact",
+  "scorer_ref": "normalized_date_equal.v1",
+  "status": "pass",
+  "score": 1.0,
+  "threshold": 1.0,
+  "expected": "2026-07-17",
+  "observed": "2026-07-17",
+  "normalization": [
+    { "op": "weekday_resolution", "detail": "Friday relative to 2026-07-13 (America/Toronto) resolves to 2026-07-17" }
+  ],
+  "evidence": [
+    { "evidence_id": "message#span-1", "source_id": "message", "text": "Friday" }
+  ],
+  "failure_codes": [],
+  "severity": "critical",
+  "duration_ms": 1,
+  "metadata": {}
+}

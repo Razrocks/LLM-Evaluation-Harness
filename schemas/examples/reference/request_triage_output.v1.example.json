@@ -1,0 +1,40 @@
+{
+  "summary": "Vendor reports the invoice exceeds the approved quote and requests a response by Friday.",
+  "tasks": [
+    {
+      "task_id": "t1",
+      "description": "Respond to the vendor about the invoice/quote discrepancy.",
+      "owner_role": "account_manager",
+      "due_date": "2026-07-17",
+      "evidence_refs": ["message#span-1"]
+    }
+  ],
+  "deadline": {
+    "date": "2026-07-17",
+    "kind": "explicit_relative",
+    "evidence_refs": ["message#span-1"]
+  },
+  "risk_level": "high",
+  "risk_reasons": [
+    {
+      "code": "amount_conflict",
+      "description": "Invoice CAD 4,800 exceeds the approved quote of CAD 3,200.",
+      "evidence_refs": ["quote_001#span-1", "invoice_001#span-1"]
+    }
+  ],
+  "missing_information": [
+    {
+      "key": "amount_or_scope_breakdown",
+      "label": "Amount or scope breakdown",
+      "reason": "No explanation is provided for the CAD 1,600 overage.",
+      "evidence_refs": ["invoice_001#span-1"]
+    }
+  ],
+  "needs_attention": true,
+  "material_claims": [
+    {
+      "claim": "The invoice amount is CAD 4,800.",
+      "evidence_refs": ["invoice_001#span-1"]
+    }
+  ]
+}
