@@ -203,8 +203,10 @@ def score_set_precision_recall_f1(assertion: Assertion, ctx: ScoringContext) -> 
     if out is None:
         return _unevaluable(assertion, "no parsed output")
     raw = resolve_selector(out, assertion.observed_selector or "$")
-    raw_items = [x for x in raw if x is not MISSING and isinstance(x, str)] if isinstance(raw, list) else []
-    norm_notes: list[dict] = []
+    raw_items = (
+        [x for x in raw if x is not MISSING and isinstance(x, str)] if isinstance(raw, list) else []
+    )
+    norm_notes: list[dict[str, Any]] = []
     observed_keys: set[str] = set()
     for item in raw_items:
         key, alias = normalize_missing_info_key(item)
@@ -213,7 +215,9 @@ def score_set_precision_recall_f1(assertion: Assertion, ctx: ScoringContext) -> 
             norm_notes.append({"alias": alias, "canonical": key})
     expected_keys = set(assertion.expected or [])
     tp = observed_keys & expected_keys
-    precision = len(tp) / len(observed_keys) if observed_keys else (1.0 if not expected_keys else 0.0)
+    precision = (
+        len(tp) / len(observed_keys) if observed_keys else (1.0 if not expected_keys else 0.0)
+    )
     recall = len(tp) / len(expected_keys) if expected_keys else 1.0
     f1 = 2 * precision * recall / (precision + recall) if (precision + recall) else 0.0
     min_recall = float(assertion.params.get("minimum_recall", 1.0))
@@ -316,7 +320,9 @@ def score_unsupported_material_claim_absent(
         if amounts:
             supported = any(ctx.evidence.supports_value(r, amt) for r in refs for amt in amounts)
             if not supported:
-                unsupported.append({"claim": text, "reason": "monetary amount not in cited sources"})
+                unsupported.append(
+                    {"claim": text, "reason": "monetary amount not in cited sources"}
+                )
         elif not any(ctx.evidence.is_valid_ref(r) for r in refs):
             unsupported.append({"claim": text, "reason": "no valid evidence reference"})
     if unsupported:

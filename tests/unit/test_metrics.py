@@ -10,7 +10,9 @@ from ai_eval.parsing import ParseStatus
 from ai_eval.scoring import AssertionResult, CaseScore
 
 
-def _case_score(results=None, state=CaseExecutionState.PASSED, crit=Criticality.NORMAL) -> CaseScore:
+def _case_score(
+    results=None, state=CaseExecutionState.PASSED, crit=Criticality.NORMAL
+) -> CaseScore:
     return CaseScore(
         case_id="c", case_version=1, criticality=crit, state=state,
         parse_status=ParseStatus.PARSED, results=results or [],

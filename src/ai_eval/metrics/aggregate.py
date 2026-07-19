@@ -82,7 +82,8 @@ def _results_of(inputs: list[CaseMetricInput], scorer_base: str) -> list[Asserti
 
 
 def _accuracy_from(results: list[AssertionResult], name: str) -> Metric:
-    evaluable = [r for r in results if r.status in (AssertionResultStatus.PASS, AssertionResultStatus.FAIL)]
+    ok = (AssertionResultStatus.PASS, AssertionResultStatus.FAIL)
+    evaluable = [r for r in results if r.status in ok]
     passes = sum(1 for r in evaluable if r.status is AssertionResultStatus.PASS)
     return _rate(name, passes, len(evaluable), "unevaluable/error results excluded")
 
@@ -113,7 +114,7 @@ def _missing_info_micro(inputs: list[CaseMetricInput]) -> list[Metric]:
     ]
 
 
-def _risk_metrics(inputs: list[CaseMetricInput]) -> tuple[list[Metric], dict]:
+def _risk_metrics(inputs: list[CaseMetricInput]) -> tuple[list[Metric], dict[str, Any]]:
     pairs = [
         (ci.expected_risk, ci.observed_risk)
         for ci in inputs

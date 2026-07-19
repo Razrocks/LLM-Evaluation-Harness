@@ -18,6 +18,11 @@ from typing import Any
 MISSING = object()
 
 
+def _pluck(seq: list[Any], field: str) -> list[Any]:
+    """Pluck ``field`` from each element of ``seq`` (supports ``items[*].key``)."""
+    return [el[field] if isinstance(el, dict) and field in el else MISSING for el in seq]
+
+
 def resolve_selector(document: Any, selector: str) -> Any:
     """Resolve ``selector`` against ``document``. Returns a value, a list, or :data:`MISSING`."""
     if selector in ("$", "$."):
@@ -27,28 +32,15 @@ def resolve_selector(document: Any, selector: str) -> Any:
 
     current: Any = document
     for token in selector[2:].split("."):
-        field, wildcard = (token[:-3], True) if token.endswith("[*]") else (token, False)
+        wildcard = token.endswith("[*]")
+        field = token[:-3] if wildcard else token
         if wildcard:
-            if not isinstance(current, dict) or field not in current:
+            if not isinstance(current, dict) or not isinstance(current.get(field), list):
                 return MISSING
-            seq = current[field]
-            if not isinstance(seq, list):
-                return MISSING
-            # Remaining tokens (if any) are applied to each element by the caller pattern;
-            # here we return the list and let a trailing field token pluck from each element.
-            current = seq
+            current = current[field]
         elif isinstance(current, list):
-            # pluck ``field`` from each element (supports ``items[*].key``)
-            plucked = []
-            for el in current:
-                if isinstance(el, dict) and field in el:
-                    plucked.append(el[field])
-                else:
-                    plucked.append(MISSING)
-            current = plucked
-        elif isinstance(current, dict):
-            if field not in current:
-                return MISSING
+            current = _pluck(current, field)
+        elif isinstance(current, dict) and field in current:
             current = current[field]
         else:
             return MISSING
