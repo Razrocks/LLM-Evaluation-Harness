@@ -1,0 +1,77 @@
+{
+  "release_id": "reference.request_triage.dataset.v1",
+  "dataset_id": "reference.request_triage.dataset",
+  "workflow_ref": "reference.request_triage.v1",
+  "state": "frozen",
+  "cases": [
+    {
+      "case_id": "request_triage_001",
+      "case_version": 1,
+      "content_hash": "sha256:917b30c27f36d4efa01f1cf732016f215b30723f29bc80d95d7f9c762aac9089"
+    },
+    {
+      "case_id": "request_triage_002",
+      "case_version": 1,
+      "content_hash": "sha256:fd7522b2e32916f5235acf815a6f0c8b3ed4d6a66a54088e377b8365344db9c1"
+    },
+    {
+      "case_id": "request_triage_003",
+      "case_version": 1,
+      "content_hash": "sha256:fc2f13a6d58fecd723cde8d7b24e20554728914821c3f2f84784989f228ae595"
+    },
+    {
+      "case_id": "request_triage_004",
+      "case_version": 1,
+      "content_hash": "sha256:119d9a471fad2ae8b3fa8db804124a27f286755d2b5cfe7242c496d53034e9ee"
+    },
+    {
+      "case_id": "request_triage_005",
+      "case_version": 1,
+      "content_hash": "sha256:d0c87123a954f1ebf3d471194e5bf78c4516ba3768c8ab79384d9383f4a2f7fc"
+    },
+    {
+      "case_id": "request_triage_006",
+      "case_version": 1,
+      "content_hash": "sha256:102cccff78f9778ed161cfa247739fbf8fd947fada1f767f95a99fa52e36e9e0"
+    },
+    {
+      "case_id": "request_triage_007",
+      "case_version": 1,
+      "content_hash": "sha256:b3648549ef88ac8f587a6bd11fbc881132b639234987b85553000c9ea69b32a2"
+    },
+    {
+      "case_id": "request_triage_008",
+      "case_version": 1,
+      "content_hash": "sha256:2a117ce05742abe8974588bf6fee8e86c3db2d654575d387edf4c69b5c64900e"
+    },
+    {
+      "case_id": "request_triage_009",
+      "case_version": 1,
+      "content_hash": "sha256:fd9ee1e1564890b4e777ce9e66ed4becad91d96742858083e7279df8dfae8a3d"
+    },
+    {
+      "case_id": "request_triage_010",
+      "case_version": 1,
+      "content_hash": "sha256:32019899f196ff27e5c4b303f9b1e83567df5f94d3bf3cbd733bba2ffef1929b"
+    },
+    {
+      "case_id": "request_triage_011",
+      "case_version": 1,
+      "content_hash": "sha256:12df481bf248855720a38b9bf0a728fdaa136ef3b72456795a9f7d07fbaf93e4"
+    },
+    {
+      "case_id": "request_triage_012",
+      "case_version": 1,
+      "content_hash": "sha256:d7739e9f1e38bc5e8a12e07f465bb744abb07d646767afc757bfb9b727a7f0ea"
+    }
+  ],
+  "purpose": "First-checkpoint reference dataset for reference.request_triage.v1.",
+  "distribution": "synthetic, public-safe",
+  "limitations": [
+    "Synthetic scenarios authored for evaluation, not sampled from production traffic.",
+    "English-only; single reference timezone family (America/Toronto).",
+    "12 seed cases; expansion toward 30-50 is planned."
+  ],
+  "created_at": null,
+  "content_hash": "sha256:1bdba57b9759d1addc363504e5e770bd8169a22d0d479c18142f1c964d91c51d"
+}
