@@ -133,3 +133,39 @@ class DatasetRelease(_Base):
     limitations: list[str] = Field(default_factory=list)
     created_at: datetime | None = None
     content_hash: str | None = None
+
+
+class StateTransition(_Base):
+    # 'from' is a Python keyword, so the field is 'from_' with a JSON alias.
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    from_: str | None = Field(default=None, alias="from")
+    to: str | None = None
+
+
+class TraceEvent(_Base):
+    """One ordered, append-only material event during a case execution (evidence memory)."""
+
+    event_id: str
+    case_execution_id: str
+    sequence: int = Field(ge=0)
+    event_type: str
+    actor: str
+    timestamp: datetime
+    input_refs: list[str] = Field(default_factory=list)
+    output_refs: list[str] = Field(default_factory=list)
+    state_transition: StateTransition | None = None
+    payload_ref: str | None = None
+    content_hash: str | None = None
+
+
+class ErrorEnvelope(_Base):
+    """A structured, redaction-safe error. ``error_code`` is a controlled FailureCode value."""
+
+    error_class: str
+    error_code: str
+    retryable: bool = False
+    message: str
+    attempt: int = 1
+    provider_request_id: str | None = None
+    details_ref: str | None = None

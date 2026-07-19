@@ -33,11 +33,14 @@ from .models import (
     Assertion,
     CaseRef,
     DatasetRelease,
+    ErrorEnvelope,
     EvalCase,
     EvidenceRequirement,
     EvidenceUnit,
     Provenance,
     Review,
+    StateTransition,
+    TraceEvent,
 )
 
 __all__ = [
@@ -71,9 +74,12 @@ __all__ = [
     "Assertion",
     "CaseRef",
     "DatasetRelease",
+    "ErrorEnvelope",
     "EvalCase",
     "EvidenceRequirement",
     "EvidenceUnit",
     "Provenance",
     "Review",
+    "StateTransition",
+    "TraceEvent",
 ]
