@@ -1,0 +1,37 @@
+{
+  "case_id": "request_triage_009",
+  "case_version": 1,
+  "workflow_ref": "reference.request_triage.v1",
+  "title": "Multiple dates mentioned, only one is the actionable deadline",
+  "input": {
+    "request_id": "req_009",
+    "message": "Following our call on 2026-06-30 and the kickoff on 2026-07-06, please deliver the signed addendum by 2026-07-24.",
+    "received_at": "2026-07-16T08:30:00-04:00",
+    "reference_timezone": "America/Toronto",
+    "documents": [],
+    "metadata": { "source": "email", "priority_hint": "medium", "category_hint": "contract_followup" }
+  },
+  "source_context": [
+    { "evidence_id": "message#span-1", "source_id": "message", "start": 96, "end": 106, "text": "2026-07-24" },
+    { "evidence_id": "message#span-2", "source_id": "message", "start": 22, "end": 32, "text": "2026-06-30" },
+    { "evidence_id": "message#span-3", "source_id": "message", "start": 51, "end": 61, "text": "2026-07-06" }
+  ],
+  "expected": {
+    "deadline": { "date": "2026-07-24", "kind": "explicit_absolute" },
+    "risk_level": "medium",
+    "missing_information": [],
+    "needs_attention": false
+  },
+  "assertions": [
+    { "assertion_id": "schema", "type": "schema_valid", "scorer_ref": "schema_valid.v1", "required": true, "severity": "critical", "on_unevaluable": "fail" },
+    { "assertion_id": "deadline_date", "type": "normalized_date_equal", "scorer_ref": "normalized_date_equal.v1", "observed_selector": "$.deadline.date", "expected": "2026-07-24", "required": true, "weight": 2.0, "severity": "critical", "pass_threshold": 1.0, "evidence_requirement": { "type": "source_reference_required", "observed_selector": "$.deadline.evidence_refs" }, "on_unevaluable": "fail" },
+    { "assertion_id": "deadline_kind", "type": "deadline_kind_equal", "scorer_ref": "deadline_kind_equal.v1", "observed_selector": "$.deadline.kind", "expected": "explicit_absolute", "required": true, "severity": "major", "on_unevaluable": "fail" },
+    { "assertion_id": "risk", "type": "categorical_equal", "scorer_ref": "categorical_equal.v1", "observed_selector": "$.risk_level", "expected": "medium", "required": true, "severity": "major", "on_unevaluable": "fail" }
+  ],
+  "tags": ["deadline", "absolute_date", "multiple_dates", "medium_risk", "contract_followup"],
+  "difficulty": "standard",
+  "criticality": "normal",
+  "ambiguity": { "is_ambiguous": false, "notes": "Two of the three dates are past context; only the delivery date is the deadline.", "accepted_alternatives": [] },
+  "provenance": { "origin": "synthetic", "author_id": "eval_author", "created_at": "2026-07-17T00:00:00Z" },
+  "review": { "status": "approved", "reviewer_id": "domain_reviewer", "reviewed_at": "2026-07-17T00:00:00Z", "rationale": "The 06-30 and 07-06 dates are historical; the actionable deadline is the 07-24 delivery date." }
+}

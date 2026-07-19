@@ -1,0 +1,35 @@
+{
+  "case_id": "request_triage_008",
+  "case_version": 1,
+  "workflow_ref": "reference.request_triage.v1",
+  "title": "Calm tone but high actual risk (production database access)",
+  "input": {
+    "request_id": "req_008",
+    "message": "When you have a moment, could you add me to the production database with write access? Working on a small cleanup script.",
+    "received_at": "2026-07-15T15:45:00-04:00",
+    "reference_timezone": "America/Toronto",
+    "documents": [],
+    "metadata": { "source": "chat", "priority_hint": "low", "category_hint": "access_request" }
+  },
+  "source_context": [
+    { "evidence_id": "message#span-1", "source_id": "message", "start": 30, "end": 77, "text": "add me to the production database with write access" }
+  ],
+  "expected": {
+    "deadline": { "date": null, "kind": "none" },
+    "risk_level": "high",
+    "missing_information": ["approval_status", "risk_acceptance_owner"],
+    "needs_attention": true
+  },
+  "assertions": [
+    { "assertion_id": "schema", "type": "schema_valid", "scorer_ref": "schema_valid.v1", "required": true, "severity": "critical", "on_unevaluable": "fail" },
+    { "assertion_id": "risk", "type": "categorical_equal", "scorer_ref": "categorical_equal.v1", "observed_selector": "$.risk_level", "expected": "high", "required": true, "severity": "critical", "on_unevaluable": "fail" },
+    { "assertion_id": "needs_attention", "type": "boolean_equal", "scorer_ref": "boolean_equal.v1", "observed_selector": "$.needs_attention", "expected": true, "required": true, "severity": "critical", "on_unevaluable": "fail" },
+    { "assertion_id": "missing_information", "type": "set_precision_recall_f1", "scorer_ref": "set_precision_recall_f1.v1", "observed_selector": "$.missing_information[*].key", "expected": ["approval_status", "risk_acceptance_owner"], "params": { "minimum_recall": 1.0 }, "required": true, "severity": "major", "on_unevaluable": "fail" }
+  ],
+  "tags": ["risky_not_urgent", "high_risk", "access_request", "no_deadline", "tone_decoupled_from_risk"],
+  "difficulty": "hard",
+  "criticality": "critical",
+  "ambiguity": { "is_ambiguous": false, "notes": "Casual tone must not mask a high-risk production-access request.", "accepted_alternatives": [] },
+  "provenance": { "origin": "synthetic", "author_id": "eval_author", "created_at": "2026-07-17T00:00:00Z" },
+  "review": { "status": "approved", "reviewer_id": "domain_reviewer", "reviewed_at": "2026-07-17T00:00:00Z", "rationale": "Production write access is high risk regardless of casual phrasing; approval and risk-acceptance owner are missing and it must be flagged for attention." }
+}
