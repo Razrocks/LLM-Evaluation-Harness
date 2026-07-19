@@ -11,6 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+import numpy as np
 from pydantic import BaseModel, ConfigDict, Field
 from sklearn.metrics import confusion_matrix, f1_score, recall_score
 
@@ -33,6 +34,9 @@ class CaseMetricInput:
     observed_risk: str | None
     score: CaseScore
     results: list[AssertionResult] = field(default_factory=list)
+    # Operational observations (captured at invocation; None when unavailable).
+    latency_ms: float | None = None
+    cost_usd: float | None = None
 
 
 class Metric(BaseModel):
@@ -148,6 +152,48 @@ def _risk_metrics(inputs: list[CaseMetricInput]) -> tuple[list[Metric], dict[str
     return metrics, {"labels": RISK_LABELS, "matrix": cm}
 
 
+def _operational_metrics(inputs: list[CaseMetricInput]) -> list[Metric]:
+    """Latency percentiles and cost per case.
+
+    Cost is reported **only** when a versioned price table produced a per-case cost; it is
+    never estimated from current provider pricing (see the source-of-truth boundary).
+    """
+    latencies = [ci.latency_ms for ci in inputs if ci.latency_ms is not None]
+    rule = "cases with a recorded invocation latency"
+    metrics: list[Metric] = []
+    if latencies:
+        arr = np.asarray(latencies, dtype=float)
+        for name, agg, value in (
+            ("latency_mean_ms", "mean", float(arr.mean())),
+            ("latency_p50_ms", "p50", float(np.percentile(arr, 50))),
+            ("latency_p95_ms", "p95", float(np.percentile(arr, 95))),
+        ):
+            metrics.append(
+                Metric(name=name, value=value, numerator=None, denominator=len(latencies),
+                       aggregation=agg, missing_data_rule=rule)
+            )
+    else:
+        for name, agg in (("latency_mean_ms", "mean"), ("latency_p50_ms", "p50"),
+                          ("latency_p95_ms", "p95")):
+            metrics.append(
+                Metric(name=name, value=None, numerator=None, denominator=0,
+                       aggregation=agg, missing_data_rule=rule)
+            )
+
+    costs = [ci.cost_usd for ci in inputs if ci.cost_usd is not None]
+    metrics.append(
+        Metric(
+            name="cost_per_case_usd",
+            value=(sum(costs) / len(costs)) if costs else None,
+            numerator=sum(costs) if costs else None,
+            denominator=len(costs),
+            aggregation="mean",
+            missing_data_rule="requires a versioned price table; omitted when absent, never estimated",
+        )
+    )
+    return metrics
+
+
 def aggregate_metrics(inputs: list[CaseMetricInput]) -> MetricSummary:
     total = len(inputs)
     invoked = sum(1 for ci in inputs if ci.invoked_ok)
@@ -168,6 +214,7 @@ def aggregate_metrics(inputs: list[CaseMetricInput]) -> MetricSummary:
     risk_metrics, confusion = _risk_metrics(inputs)
     metrics.extend(risk_metrics)
     metrics.extend(_missing_info_micro(inputs))
+    metrics.extend(_operational_metrics(inputs))
 
     ev = _results_of(inputs, "evidence_reference_valid")
     ev_pass = sum(1 for r in ev if r.status is AssertionResultStatus.PASS)
@@ -204,6 +251,8 @@ def build_metric_input(
     expected_risk: str | None,
     observed_risk: str | None,
     score: CaseScore,
+    latency_ms: float | None = None,
+    cost_usd: float | None = None,
 ) -> CaseMetricInput:
     parse_ok = score.state not in (
         CaseExecutionState.PARSE_ERROR,
@@ -224,4 +273,6 @@ def build_metric_input(
         observed_risk=observed_risk,
         score=score,
         results=score.results,
+        latency_ms=latency_ms,
+        cost_usd=cost_usd,
     )

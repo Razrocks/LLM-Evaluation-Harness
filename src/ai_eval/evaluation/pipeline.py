@@ -19,6 +19,14 @@ from ai_eval.scoring import CaseScore, evaluate_case
 
 
 @dataclass
+class ExecutionObservation:
+    """Operational facts captured at invocation time, carried into metrics."""
+
+    latency_ms: float | None = None
+    cost_usd: float | None = None
+
+
+@dataclass
 class RunEvaluation:
     scores: list[CaseScore]
     inputs: list[CaseMetricInput]
@@ -37,8 +45,14 @@ def _no_output() -> ParseOutcome:
 
 def evaluate_raw_outputs(
     items: list[tuple[EvalCase, str | None, bool]],
+    observations: dict[str, ExecutionObservation] | None = None,
 ) -> RunEvaluation:
-    """Score a run from ``(case, raw_output, invoked_ok)`` triples."""
+    """Score a run from ``(case, raw_output, invoked_ok)`` triples.
+
+    ``observations`` optionally supplies per-case latency/cost (keyed by ``case_id``) so
+    operational metrics can be aggregated alongside quality metrics.
+    """
+    obs_by_case = observations or {}
     scores: list[CaseScore] = []
     inputs: list[CaseMetricInput] = []
     parsed: list[dict[str, Any]] = []
@@ -52,6 +66,7 @@ def evaluate_raw_outputs(
         observed_risk = parse.value.get("risk_level") if (parse.ok and parse.value) else None
         expected_risk = case.expected.get("risk_level") if isinstance(case.expected, dict) else None
 
+        obs = obs_by_case.get(case.case_id, ExecutionObservation())
         scores.append(score)
         inputs.append(
             build_metric_input(
@@ -61,6 +76,8 @@ def evaluate_raw_outputs(
                 expected_risk=expected_risk,
                 observed_risk=observed_risk,
                 score=score,
+                latency_ms=obs.latency_ms,
+                cost_usd=obs.cost_usd,
             )
         )
         parsed.append(

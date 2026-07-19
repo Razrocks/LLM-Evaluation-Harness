@@ -2,6 +2,6 @@
 
 from __future__ import annotations
 
-from .pipeline import RunEvaluation, evaluate_raw_outputs
+from .pipeline import ExecutionObservation, RunEvaluation, evaluate_raw_outputs
 
-__all__ = ["RunEvaluation", "evaluate_raw_outputs"]
+__all__ = ["ExecutionObservation", "RunEvaluation", "evaluate_raw_outputs"]

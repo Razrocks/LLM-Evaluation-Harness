@@ -1,0 +1,12 @@
+{
+  "eval_plan_id": "reference_request_triage_baseline",
+  "workflow_ref": "reference.request_triage.v1",
+  "dataset_manifest_path": "datasets/reference/request_triage/v1/manifest.json",
+  "target": {
+    "adapter_id": "recorded_pass",
+    "adapter_version": "v1",
+    "output_schema_id": "request_triage.output.v1"
+  },
+  "scoring_plan_id": "reference_request_triage_scoring",
+  "gate_id": "reference_request_triage_v1_ci"
+}

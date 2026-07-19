@@ -13,13 +13,13 @@ from __future__ import annotations
 
 import uuid
 from collections.abc import Callable
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 from ai_eval.artifacts import RunArtifactWriter
-from ai_eval.domain import CaseExecutionState, RunStatus, StateTransition, TraceEvent
+from ai_eval.domain import CaseExecutionState, EvalCase, RunStatus, StateTransition, TraceEvent
 from ai_eval.targets import InvocationContext, TargetAdapter
 
 from .models import EvalPlan, RunManifest
@@ -48,6 +48,9 @@ class RunResult:
     manifest: RunManifest
     records: list[CaseExecutionRecord]
     run_dir: Path
+    # The exact resolved case versions this run executed, so downstream scoring never
+    # needs to re-resolve the plan.
+    cases: list[EvalCase] = field(default_factory=list)
 
 
 def _emit(
@@ -140,4 +143,6 @@ def execute_plan(
         update={"status": RunStatus.COMPLETED, "completed_at": tick()}
     )
     writer.write_manifest(completed.as_json())
-    return RunResult(manifest=completed, records=records, run_dir=writer.paths.root)
+    return RunResult(
+        manifest=completed, records=records, run_dir=writer.paths.root, cases=resolved.cases
+    )
