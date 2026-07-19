@@ -4,9 +4,9 @@ Updated each sprint. Truth source for what is implemented vs planned. Last updat
 
 ## Current position
 
-**Sprint 1 (Milestone 1 — Dataset & domain core): ✅ complete.**
+**Sprint 2 (Milestone 2 — Execution & evidence capture): ✅ complete.**
 Cadence: sprint-by-sprint, pause after each milestone. First checkpoint = M0–M4 (offline, no
-API keys). Do not widen until M4 is green. **Next: await go-ahead for M2.**
+API keys). Do not widen until M4 is green. **Next: await go-ahead for M3.**
 
 ## Milestone status
 
@@ -14,52 +14,48 @@ API keys). Do not widen until M4 is green. **Next: await go-ahead for M2.**
 |---|---|
 | M0 — Spec lock (docs + schemas) | ✅ complete |
 | M1 — Dataset & domain core | ✅ complete |
-| M2 — Execution & evidence capture | ⬜ not started (next) |
-| M3 — Parsing, scoring, reporting | ⬜ not started |
+| M2 — Execution & evidence capture | ✅ complete |
+| M3 — Parsing, scoring, reporting | ⬜ not started (next) |
 | M4 — Baseline, gate, CLI, demo | ⬜ not started |
 | M5–M10 + external adapters | ⬜ roadmap only |
 
 ## Verification (all green)
 
 ```bash
-python -m uv run pytest -q          # 41 passed
+python -m uv run pytest -q          # 64 passed
 python -m uv run ruff check .        # clean
-python -m uv run mypy src            # clean (10 source files)
-python -m uv run python scripts/build_request_triage_release.py   # re-freezes the release
+python -m uv run mypy src            # clean (19 source files)
 ```
 
-## M1 deliverables
+## M2 deliverables
 
-- **`src/ai_eval/domain/`** — `enums.py` (all controlled vocabularies + lifecycle states as
-  `StrEnum`), `models.py` (Pydantic v2, `extra="forbid"`: EvalCase, Assertion, EvidenceUnit,
-  EvidenceRequirement, Provenance, Review, Ambiguity, CaseRef, DatasetRelease), `hashing.py`
-  (canonical JSON + `sha256:` content hashing), `failure_codes.py` (full taxonomy enum).
-- **`src/ai_eval/datasets/`** — `loader.py` (`load_cases_jsonl`, `load_cases_dir`,
-  `dump_cases_jsonl`), `validation.py` (per-case + collection checks → typed
-  `ValidationReport`), `release.py` (content-addressed freezer, reproducible release hash).
-- **Reference dataset** — 12 reviewed seed cases at
-  `datasets/reference/request_triage/v1/cases/*.json`; frozen `manifest.json` +
-  `cases.jsonl` + `release_notes.md`. Coverage: risk high/med/low = 5/4/3; criticality
-  critical 5; deadline kinds relative 4 / none 5 / absolute 2 / ambiguous 1; adversarial cases
-  (prompt-injection, unsupported-action, tone-decoupled, doc conflicts).
-- **`scripts/build_request_triage_release.py`** — validates + freezes the release.
-- **Tests** — `tests/unit/test_domain.py`, `tests/unit/test_datasets.py` (41 total incl. M0
-  schema tests): case/dataset validation, missing-selector + duplicate-assertion detection,
-  content-hash-mismatch (immutability), duplicate/workflow/approval/empty-dataset checks,
-  release hash reproducibility + edit-sensitivity, JSONL round-trip, reference-release
-  load/validate, manifest-hash reproducibility.
+- **`src/ai_eval/domain/`** — added `TraceEvent`, `StateTransition` (`from` alias +
+  `.of()` factory), `ErrorEnvelope` to `models.py`.
+- **`src/ai_eval/targets/`** — `base.py` (`TargetAdapter` ABC, `TargetInvocationResult`,
+  `Attempt`, `InvocationContext` — provider-neutral, never scores); `fixture.py` (5 recorded
+  fixtures: `recorded_pass`, `recorded_missing_information_regression`,
+  `recorded_deadline_regression`, `recorded_evidence_regression`, `recorded_schema_failure`,
+  synthesized deterministically from each case's approved answer + a registry).
+- **`src/ai_eval/execution/`** — `models.py` (`EvalPlan`, `TargetSpec`, `RunManifest` matching
+  `run_manifest.v1`), `resolver.py` (pins all refs → manifest; **verifies case-content
+  integrity** — tampered `cases.jsonl` fails resolution), `orchestrator.py` (invoke → **raw
+  capture before parse** → trace; injectable clock for deterministic runs).
+- **`src/ai_eval/artifacts/`** — `writer.py` (atomic writes; `runs/<run_id>/` →
+  `run_manifest.json`, `raw/<cx>.json`, `case_executions.jsonl`, `traces.jsonl`).
+- **Tests** — `tests/contract/test_targets.py` + `tests/contract/test_execution.py` (64 total).
+  Verified: recorded_pass output schema-valid for all 12 cases; each regression variant's
+  isolated defect; envelope shape; plan resolution pins refs; integrity catches tampering;
+  workflow mismatch rejected; orchestrator captures 12 raw files with no parsed outputs (ADR
+  0002 ordering). Produced `run_manifest.json` validates against `run_manifest.v1`.
 
 ## Deferred to their milestone (not built yet)
 
-Pydantic models for RunManifest, AssertionResult, ExecutionConfig, ScoringPlan, EvalPlan,
-Metric, Baseline, GatePolicy are built in M2–M4 where their logic lands (JSON Schemas for them
-already exist under `schemas/`). The `request_triage.output.v1` Pydantic model lands in M3
-(parsing).
+Parser + `request_triage.output.v1` Pydantic model + scorers + metrics + reports (M3);
+baseline/gate/CLI/demo (M4). Provider target adapters (Claude/GPT/Gemini/HF) — M5.
 
-## Notes / corrections
+## Notes
 
-- A duplicate versioned example set added during M0 was removed; canonical examples are the
-  flat `schemas/examples/<concept>.example.json` set. (See git history.)
+- Ruff kept strict (spec §3.5.1); config confirmed by user 2026-07-18.
 - **User action (non-blocking):** drop the 3 verbatim source docs into `docs/spec/`.
 
 ## Confirmed build decisions

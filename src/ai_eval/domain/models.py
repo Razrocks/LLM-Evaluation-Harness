@@ -142,6 +142,11 @@ class StateTransition(_Base):
     from_: str | None = Field(default=None, alias="from")
     to: str | None = None
 
+    @classmethod
+    def of(cls, from_state: str | None, to_state: str | None) -> StateTransition:
+        """Build a transition without tripping over the reserved ``from`` alias."""
+        return cls.model_validate({"from": from_state, "to": to_state})
+
 
 class TraceEvent(_Base):
     """One ordered, append-only material event during a case execution (evidence memory)."""

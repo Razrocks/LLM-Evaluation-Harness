@@ -8,6 +8,7 @@ invoked for a case execution *before* any parsing of that output ever happens.
 
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import tempfile
@@ -27,10 +28,8 @@ def _atomic_write(path: Path, text: str) -> None:
             handle.write(text)
         os.replace(tmp, path)
     except BaseException:
-        try:
+        with contextlib.suppress(OSError):
             os.unlink(tmp)
-        except OSError:
-            pass
         raise
 
 

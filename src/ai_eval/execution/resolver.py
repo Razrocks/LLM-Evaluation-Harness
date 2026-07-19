@@ -67,9 +67,10 @@ def resolve_eval_plan(
             f"workflow mismatch: plan '{plan.workflow_ref}' vs release '{release.workflow_ref}'"
         )
     if release.content_hash is None:
-        raise PlanResolutionError(f"release '{release.release_id}' has no content_hash (not frozen)")
+        raise PlanResolutionError(f"release '{release.release_id}' is not frozen (no content_hash)")
 
-    by_key = {(c.case_id, c.case_version): c for c in load_cases_jsonl(manifest_path.parent / "cases.jsonl")}
+    loaded = load_cases_jsonl(manifest_path.parent / "cases.jsonl")
+    by_key = {(c.case_id, c.case_version): c for c in loaded}
     cases: list[EvalCase] = []
     for entry in release.cases:
         key = (entry.case_id, entry.case_version)

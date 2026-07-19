@@ -91,14 +91,15 @@ def execute_plan(
         plan, run_id=run_id, repo_root=repo_root, repo_revision=repo_revision, now=tick()
     )
     writer = RunArtifactWriter(runs_dir, run_id)
-    writer.write_manifest(resolved.manifest.model_copy(update={"status": RunStatus.RUNNING}).as_json())
+    running = resolved.manifest.model_copy(update={"status": RunStatus.RUNNING})
+    writer.write_manifest(running.as_json())
 
     records: list[CaseExecutionRecord] = []
     for case in resolved.cases:
         cx_id = f"{run_id}:{case.case_id}"
         seq = _emit(
             writer, cx_id, 0, "invocation_started", tick(),
-            StateTransition(from_="pending", to="invoking"),
+            StateTransition.of("pending", "invoking"),
         )
         result = adapter.invoke(case, InvocationContext(run_id=run_id, case_execution_id=cx_id))
 
@@ -109,13 +110,13 @@ def execute_plan(
             state = CaseExecutionState.INVOCATION_ERROR
             seq = _emit(
                 writer, cx_id, seq, "invocation_error", tick(),
-                StateTransition(from_="invoking", to="invocation_error"),
+                StateTransition.of("invoking", "invocation_error"),
             )
         else:
             state = CaseExecutionState.RESPONSE_RECEIVED
             seq = _emit(
                 writer, cx_id, seq, "response_received", tick(),
-                StateTransition(from_="invoking", to="response_received"),
+                StateTransition.of("invoking", "response_received"),
                 output_refs=[f"raw/{raw_path.name}"],
             )
 
