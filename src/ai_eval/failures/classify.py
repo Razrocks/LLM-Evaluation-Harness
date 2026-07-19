@@ -7,6 +7,8 @@ back to the exact case and assertion, and never hides an unknown failure in a ge
 
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from ai_eval.domain import AssertionResultStatus, Severity
@@ -25,7 +27,7 @@ class FailureRecord(BaseModel):
     failure_codes: list[str] = Field(default_factory=list)
     expected: object = None
     observed: object = None
-    evidence: list[dict] = Field(default_factory=list)
+    evidence: list[dict[str, Any]] = Field(default_factory=list)
 
 
 def build_failures(scores: list[CaseScore]) -> list[FailureRecord]:

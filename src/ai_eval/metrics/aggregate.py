@@ -9,6 +9,7 @@ confusion matrix use scikit-learn so the classification math is trusted, not han
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 from sklearn.metrics import confusion_matrix, f1_score, recall_score
@@ -45,7 +46,7 @@ class Metric(BaseModel):
     aggregation: str
     scope: str = "run"
     missing_data_rule: str
-    detail: dict = Field(default_factory=dict)
+    detail: dict[str, Any] = Field(default_factory=dict)
 
 
 class MetricSummary(BaseModel):
@@ -53,7 +54,7 @@ class MetricSummary(BaseModel):
 
     total_cases: int
     metrics: list[Metric]
-    risk_confusion_matrix: dict = Field(default_factory=dict)
+    risk_confusion_matrix: dict[str, Any] = Field(default_factory=dict)
     critical_case_failures: int = 0
 
     def by_name(self) -> dict[str, Metric]:
@@ -61,10 +62,10 @@ class MetricSummary(BaseModel):
 
 
 def _base(scorer_ref: str) -> str:
-    return scorer_ref.split(".v")[0]
+    return scorer_ref.split(".v", maxsplit=1)[0]
 
 
-def _rate(name: str, num: int, den: int, rule: str, detail: dict | None = None) -> Metric:
+def _rate(name: str, num: int, den: int, rule: str, detail: dict[str, Any] | None = None) -> Metric:
     return Metric(
         name=name,
         value=(num / den) if den else None,

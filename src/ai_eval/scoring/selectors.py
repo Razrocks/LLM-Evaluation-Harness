@@ -37,20 +37,19 @@ def resolve_selector(document: Any, selector: str) -> Any:
             # Remaining tokens (if any) are applied to each element by the caller pattern;
             # here we return the list and let a trailing field token pluck from each element.
             current = seq
-        else:
-            if isinstance(current, list):
-                # pluck ``field`` from each element (supports ``items[*].key``)
-                plucked = []
-                for el in current:
-                    if isinstance(el, dict) and field in el:
-                        plucked.append(el[field])
-                    else:
-                        plucked.append(MISSING)
-                current = plucked
-            elif isinstance(current, dict):
-                if field not in current:
-                    return MISSING
-                current = current[field]
-            else:
+        elif isinstance(current, list):
+            # pluck ``field`` from each element (supports ``items[*].key``)
+            plucked = []
+            for el in current:
+                if isinstance(el, dict) and field in el:
+                    plucked.append(el[field])
+                else:
+                    plucked.append(MISSING)
+            current = plucked
+        elif isinstance(current, dict):
+            if field not in current:
                 return MISSING
+            current = current[field]
+        else:
+            return MISSING
     return current

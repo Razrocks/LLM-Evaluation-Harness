@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import re
 from collections.abc import Callable
+from typing import Any
 
 from ai_eval.domain import Assertion, AssertionResultStatus, FailureCode, OnUnevaluable
 
@@ -42,9 +43,9 @@ def _mk(
     expected: object = None,
     observed: object = None,
     codes: list[FailureCode] | None = None,
-    evidence: list[dict] | None = None,
-    normalization: list[dict] | None = None,
-    metadata: dict | None = None,
+    evidence: list[dict[str, Any]] | None = None,
+    normalization: list[dict[str, Any]] | None = None,
+    metadata: dict[str, Any] | None = None,
 ) -> AssertionResult:
     return AssertionResult(
         assertion_id=assertion.assertion_id,
@@ -71,14 +72,14 @@ def _unevaluable(assertion: Assertion, reason: str) -> AssertionResult:
     return _mk(assertion, _UNEVAL, metadata={"unevaluable_reason": reason})
 
 
-def _selector_value(output: dict, selector: str | None) -> object:
+def _selector_value(output: dict[str, Any], selector: str | None) -> object:
     if not selector:
         return MISSING
     value = resolve_selector(output, selector)
     return None if value is MISSING else value
 
 
-def _all_evidence_refs(output: dict) -> list[tuple[str, str]]:
+def _all_evidence_refs(output: dict[str, Any]) -> list[tuple[str, str]]:
     """Every (field, evidence_ref) pair present in a triage output."""
     refs: list[tuple[str, str]] = []
     for r in (output.get("deadline") or {}).get("evidence_refs", []) or []:

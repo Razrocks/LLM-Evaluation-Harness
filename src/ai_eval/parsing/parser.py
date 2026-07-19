@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from enum import StrEnum
+from typing import Any
 
 from pydantic import ValidationError
 
@@ -30,11 +31,11 @@ class ParseOutcome:
     """The result of parsing one raw candidate output. Exactly one status; evidence retained."""
 
     status: ParseStatus
-    value: dict | None = None
+    value: dict[str, Any] | None = None
     model: TriageOutput | None = None
     failure_code: FailureCode | None = None
     message: str | None = None
-    errors: list[dict] = field(default_factory=list)
+    errors: list[dict[str, Any]] = field(default_factory=list)
 
     @property
     def ok(self) -> bool:

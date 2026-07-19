@@ -9,6 +9,7 @@ layers but none import it — keeping the dependency flow one-directional.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 from ai_eval.domain import CaseExecutionState, EvalCase, FailureCode
 from ai_eval.failures import FailureRecord, build_failures
@@ -23,7 +24,7 @@ class RunEvaluation:
     inputs: list[CaseMetricInput]
     summary: MetricSummary
     failures: list[FailureRecord]
-    parsed: list[dict]
+    parsed: list[dict[str, Any]]
 
 
 def _no_output() -> ParseOutcome:
@@ -40,7 +41,7 @@ def evaluate_raw_outputs(
     """Score a run from ``(case, raw_output, invoked_ok)`` triples."""
     scores: list[CaseScore] = []
     inputs: list[CaseMetricInput] = []
-    parsed: list[dict] = []
+    parsed: list[dict[str, Any]] = []
 
     for case, raw, invoked_ok in items:
         parse = parse_triage_output(raw) if (invoked_ok and raw is not None) else _no_output()

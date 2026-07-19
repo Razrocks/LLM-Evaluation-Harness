@@ -21,14 +21,14 @@ def _write_json(path: Path, obj: Any) -> None:
     path.write_text(json.dumps(obj, indent=2, ensure_ascii=False, sort_keys=True), encoding="utf-8")
 
 
-def _write_jsonl(path: Path, rows: list[dict]) -> None:
+def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8") as fh:
         for row in rows:
             fh.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
 
 
-def _assertion_rows(evaluation: RunEvaluation) -> list[dict]:
-    rows: list[dict] = []
+def _assertion_rows(evaluation: RunEvaluation) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
     for score in evaluation.scores:
         for r in score.results:
             row = r.model_dump(mode="json")
