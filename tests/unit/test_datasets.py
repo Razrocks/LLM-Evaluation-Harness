@@ -51,7 +51,9 @@ def _assertion(**overrides: object) -> Assertion:
     return Assertion(**data)  # type: ignore[arg-type]
 
 
-def _case(case_id: str = "c1", version: int = 1, approved: bool = True, **overrides: object) -> EvalCase:
+def _case(
+    case_id: str = "c1", version: int = 1, approved: bool = True, **overrides: object
+) -> EvalCase:
     status = ReviewStatus.APPROVED if approved else ReviewStatus.DRAFT
     data: dict[str, object] = dict(
         case_id=case_id,

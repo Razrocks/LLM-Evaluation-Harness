@@ -26,6 +26,7 @@ __all__ = [
     "compute_case_hash",
     "dump_cases_jsonl",
     "finalize_case_hashes",
+    "load_cases_dir",
     "load_cases_jsonl",
     "validate_case",
     "validate_dataset",

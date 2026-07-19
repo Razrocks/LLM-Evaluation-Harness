@@ -7,13 +7,10 @@ never drift or be silently invented.
 
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 
 
-class FailureCode(str, Enum):
-    def __str__(self) -> str:  # pragma: no cover - trivial
-        return str(self.value)
-
+class FailureCode(StrEnum):
     # --- definition ---
     CASE_SCHEMA_INVALID = "CASE_SCHEMA_INVALID"
     CASE_REFERENCE_INVALID = "CASE_REFERENCE_INVALID"

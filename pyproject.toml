@@ -58,6 +58,9 @@ src = ["src", "tests"]
 select = ["E", "F", "I", "UP", "B", "SIM", "PL"]
 ignore = ["PLR0913"]  # allow wide constructors for frozen manifest/record models
 
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["PLR2004"]  # literal values in assertions are expected in tests
+
 [tool.mypy]
 python_version = "3.12"
 strict = true

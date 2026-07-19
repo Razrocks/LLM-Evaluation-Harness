@@ -6,14 +6,11 @@ domain models round-trip losslessly to and from the on-disk contracts under ``sc
 
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 
 
-class _StrEnum(str, Enum):
-    """String enum whose ``str()`` is the bare value (JSON-friendly)."""
-
-    def __str__(self) -> str:  # pragma: no cover - trivial
-        return str(self.value)
+class _StrEnum(StrEnum):
+    """Base string enum: members are their string value (JSON-friendly)."""
 
 
 # --- review / lifecycle states ------------------------------------------------------------

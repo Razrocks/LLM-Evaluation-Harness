@@ -82,7 +82,11 @@ def _validate_assertion(case_id: str, assertion: Assertion) -> list[ValidationIs
             )
         )
     req = assertion.evidence_requirement
-    if req is not None and req.type is not EvidenceRequirementType.NONE and not req.observed_selector:
+    if (
+        req is not None
+        and req.type is not EvidenceRequirementType.NONE
+        and not req.observed_selector
+    ):
         issues.append(
             ValidationIssue(
                 FailureCode.ASSERTION_INVALID,
