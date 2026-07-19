@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from .loader import CaseLoadError, dump_cases_jsonl, load_cases_jsonl
+from .loader import CaseLoadError, dump_cases_jsonl, load_cases_dir, load_cases_jsonl
 from .release import (
     ReleaseError,
     build_release,

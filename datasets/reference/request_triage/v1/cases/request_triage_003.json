@@ -1,0 +1,36 @@
+{
+  "case_id": "request_triage_003",
+  "case_version": 1,
+  "workflow_ref": "reference.request_triage.v1",
+  "title": "No deadline, simple low-risk information request",
+  "input": {
+    "request_id": "req_003",
+    "message": "Hi, could you share the current version of the employee handbook when you get a chance? No rush.",
+    "received_at": "2026-07-14T14:00:00-04:00",
+    "reference_timezone": "America/Toronto",
+    "documents": [],
+    "metadata": { "source": "chat", "priority_hint": "low", "category_hint": "information_request" }
+  },
+  "source_context": [
+    { "evidence_id": "message#span-1", "source_id": "message", "start": 84, "end": 92, "text": "No rush." }
+  ],
+  "expected": {
+    "deadline": { "date": null, "kind": "none" },
+    "risk_level": "low",
+    "missing_information": [],
+    "needs_attention": false
+  },
+  "assertions": [
+    { "assertion_id": "schema", "type": "schema_valid", "scorer_ref": "schema_valid.v1", "required": true, "severity": "critical", "on_unevaluable": "fail" },
+    { "assertion_id": "deadline_kind", "type": "deadline_kind_equal", "scorer_ref": "deadline_kind_equal.v1", "observed_selector": "$.deadline.kind", "expected": "none", "required": true, "severity": "major", "on_unevaluable": "fail" },
+    { "assertion_id": "risk", "type": "categorical_equal", "scorer_ref": "categorical_equal.v1", "observed_selector": "$.risk_level", "expected": "low", "required": true, "severity": "major", "on_unevaluable": "fail" },
+    { "assertion_id": "missing_information", "type": "set_precision_recall_f1", "scorer_ref": "set_precision_recall_f1.v1", "observed_selector": "$.missing_information[*].key", "expected": [], "params": {}, "required": true, "severity": "minor", "on_unevaluable": "fail" },
+    { "assertion_id": "needs_attention", "type": "boolean_equal", "scorer_ref": "boolean_equal.v1", "observed_selector": "$.needs_attention", "expected": false, "required": true, "severity": "major", "on_unevaluable": "fail" }
+  ],
+  "tags": ["no_deadline", "low_risk", "information_request"],
+  "difficulty": "easy",
+  "criticality": "normal",
+  "ambiguity": { "is_ambiguous": false, "notes": null, "accepted_alternatives": [] },
+  "provenance": { "origin": "synthetic", "author_id": "eval_author", "created_at": "2026-07-17T00:00:00Z" },
+  "review": { "status": "approved", "reviewer_id": "domain_reviewer", "reviewed_at": "2026-07-17T00:00:00Z", "rationale": "Explicit 'no rush' and benign handbook request; no deadline, nothing missing." }
+}

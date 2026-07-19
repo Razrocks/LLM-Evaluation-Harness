@@ -1,0 +1,39 @@
+{
+  "case_id": "request_triage_002",
+  "case_version": 1,
+  "workflow_ref": "reference.request_triage.v1",
+  "title": "Explicit absolute deadline, routine vendor coordination, medium risk",
+  "input": {
+    "request_id": "req_002",
+    "message": "Please confirm the venue booking for the offsite. We need it locked in by 2026-08-03.",
+    "received_at": "2026-07-20T09:15:00-04:00",
+    "reference_timezone": "America/Toronto",
+    "documents": [
+      { "document_id": "venue_quote_002", "document_version": "1", "text": "Hall rental: USD 1,200 for one day, deposit 25% due on booking.", "content_hash": "sha256:venue002" }
+    ],
+    "metadata": { "source": "email", "priority_hint": "medium", "category_hint": "scheduling" }
+  },
+  "source_context": [
+    { "evidence_id": "message#span-1", "source_id": "message", "start": 66, "end": 76, "text": "2026-08-03" }
+  ],
+  "expected": {
+    "deadline": { "date": "2026-08-03", "kind": "explicit_absolute" },
+    "risk_level": "medium",
+    "missing_information": ["approval_status"],
+    "needs_attention": false
+  },
+  "assertions": [
+    { "assertion_id": "schema", "type": "schema_valid", "scorer_ref": "schema_valid.v1", "required": true, "severity": "critical", "on_unevaluable": "fail" },
+    { "assertion_id": "deadline_date", "type": "normalized_date_equal", "scorer_ref": "normalized_date_equal.v1", "observed_selector": "$.deadline.date", "expected": "2026-08-03", "required": true, "weight": 2.0, "severity": "critical", "pass_threshold": 1.0, "evidence_requirement": { "type": "source_reference_required", "observed_selector": "$.deadline.evidence_refs" }, "on_unevaluable": "fail" },
+    { "assertion_id": "deadline_kind", "type": "deadline_kind_equal", "scorer_ref": "deadline_kind_equal.v1", "observed_selector": "$.deadline.kind", "expected": "explicit_absolute", "required": true, "severity": "major", "on_unevaluable": "fail" },
+    { "assertion_id": "risk", "type": "categorical_equal", "scorer_ref": "categorical_equal.v1", "observed_selector": "$.risk_level", "expected": "medium", "required": true, "severity": "major", "on_unevaluable": "fail" },
+    { "assertion_id": "missing_information", "type": "set_precision_recall_f1", "scorer_ref": "set_precision_recall_f1.v1", "observed_selector": "$.missing_information[*].key", "expected": ["approval_status"], "params": { "minimum_recall": 1.0 }, "required": true, "severity": "minor", "on_unevaluable": "fail" },
+    { "assertion_id": "needs_attention", "type": "boolean_equal", "scorer_ref": "boolean_equal.v1", "observed_selector": "$.needs_attention", "expected": false, "required": true, "severity": "major", "on_unevaluable": "fail" }
+  ],
+  "tags": ["deadline", "absolute_date", "medium_risk", "scheduling"],
+  "difficulty": "easy",
+  "criticality": "normal",
+  "ambiguity": { "is_ambiguous": false, "notes": null, "accepted_alternatives": [] },
+  "provenance": { "origin": "synthetic", "author_id": "eval_author", "created_at": "2026-07-17T00:00:00Z" },
+  "review": { "status": "approved", "reviewer_id": "domain_reviewer", "reviewed_at": "2026-07-17T00:00:00Z", "rationale": "Absolute ISO date stated in message; booking approval not yet confirmed." }
+}
