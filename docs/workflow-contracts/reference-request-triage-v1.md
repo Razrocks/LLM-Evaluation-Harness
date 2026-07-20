@@ -103,7 +103,7 @@ Every case answers these, each as one or more atomic assertions:
 
 The canonical invoice/Friday case — a vendor emails on Monday July 13 that an invoice exceeds the
 quote and asks for a reply "by Friday," with conflicting amounts in two attached documents — is
-walked through the entire pipeline (input → assertions → scoring → gate) in
+is traced through the pipeline (input → assertions → scoring → gate) in
 [../business-ontology.md §4](../business-ontology.md#4-worked-example--one-case-through-the-whole-pipeline).
 
 ## Deadline normalization (versioned)

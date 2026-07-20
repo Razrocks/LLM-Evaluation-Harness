@@ -20,7 +20,7 @@ def test_demo_story_holds(tmp_path: Path) -> None:
     output = "\n".join(lines)
     assert code == 0, output
 
-    # The story, asserted explicitly rather than trusting the exit code alone.
+    # Assert each expected outcome explicitly rather than relying on the exit code alone.
     assert output.count("GATE: PASS") == 2
     assert "GATE: FAIL" in output
     assert "MISSING_INFO_OMITTED" in output

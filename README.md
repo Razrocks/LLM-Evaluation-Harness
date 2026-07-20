@@ -1,22 +1,22 @@
 # AI Evaluation & Reliability Platform (`ai-eval`)
 
-A **standalone** quality-control, benchmarking, and regression-testing harness for AI workflows.
-It answers — with reproducible, evidence-backed proof — whether a specific AI workflow
-configuration produces contract-valid output, extracts the right facts, detects missing
-information, avoids unsupported claims, and **did not regress against an approved baseline**.
+A standalone quality-control, benchmarking, and regression-testing harness for AI workflows. It
+measures whether a given workflow configuration produces contract-valid output, extracts the
+correct facts, detects missing information, avoids unsupported claims, and regresses against an
+approved baseline. Results are reproducible and every score resolves to source evidence.
 
-> A test harness, evidence ledger, benchmark laboratory, scoreboard, and release gate for AI
-> systems. It ships with its own reference workload and runs from a clean checkout **with no API
-> credentials**.
+The repository ships with its own reference workload, dataset, targets, scorers, and gate, and
+runs from a clean checkout with no API credentials.
 
-## The proof, in one command
+## Quickstart
 
 ```bash
 uv sync
 uv run ai-eval demo
 ```
 
-That runs the whole story offline:
+`ai-eval demo` executes five steps offline and exits non-zero if any gate outcome differs from
+the expected result:
 
 ```
 1. Validate the frozen dataset release        -> 12 approved cases valid
@@ -38,10 +38,10 @@ That runs the whole story offline:
 5. Run the CORRECTED configuration            -> GATE: PASS
 ```
 
-**That is the whole thesis.** The degraded target returns *perfectly valid JSON* — a naive
-"is it parseable?" check passes it. The platform still catches it, says exactly which cases and
-assertions regressed, points at the source evidence, and blocks promotion with a non-zero exit
-code. No model was called; the demo is deterministic.
+The degraded configuration returns schema-valid JSON, so a parse check accepts it. The gate
+rejects it because `missing_information_recall` falls to 0.0, and reports the failing cases,
+assertions, failure codes, and source evidence. Exit code is 1. No model is called and the run
+is deterministic.
 
 ## Status
 

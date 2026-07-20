@@ -77,7 +77,7 @@ scored as a target failure.*
 ## Counting rules — why this matters for honesty
 
 The taxonomy is not just labels; it decides how a failure is *counted*, and honest counting is
-the whole point.
+it determines whether a metric is honest.
 
 - **Invocation failures are excluded from quality-metric numerators.** If a provider times out on
   3 of 30 cases, high-risk recall is computed over the *evaluable* cases with an explicit

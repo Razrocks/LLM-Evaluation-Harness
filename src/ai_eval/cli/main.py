@@ -6,7 +6,7 @@ Five use cases, each mapping to one application capability:
 ``run``               execute a plan end to end (invoke -> score -> report -> compare -> gate)
 ``compare``           compare a stored run against an approved baseline
 ``gate``              apply a gate policy to a stored run
-``demo``              the offline regression story: PASS -> FAIL -> PASS
+``demo``              run the offline end-to-end regression check (PASS, FAIL, PASS)
 
 Exit-code contract (documented, relied on by CI): ``0`` PASS, ``1`` FAIL, ``2`` INVALID.
 """
@@ -199,7 +199,7 @@ def gate_cmd(
 def demo_cmd(
     runs_dir: Path | None = typer.Option(None, help="Where to write runs/ (default ./runs)."),
 ) -> None:
-    """The offline regression story: baseline PASS -> degraded FAIL -> corrected PASS."""
+    """Run the offline end-to-end check: baseline PASS, degraded FAIL, corrected PASS."""
     code = run_demo(repo_root=REPO_ROOT, runs_dir=runs_dir, echo=typer.echo)
     raise typer.Exit(code)
 

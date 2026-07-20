@@ -77,8 +77,8 @@ convention, not yet by auth code.
 
 ## 3. Core use cases
 
-The platform earns its keep in these recurring situations. Each is a real scenario an engineer
-hits.
+These are the situations the platform is built to handle. Each describes a concrete input, the
+platform's behavior, and the resulting decision.
 
 ### UC-1 — "I changed the prompt. Did I break anything?"
 
@@ -173,8 +173,8 @@ case is marked critical; risk underclassification on a high-risk case trips the 
 **FAIL**, exit code non-zero, with per-rule evidence pointing back to this exact case and these
 two assertion results.
 
-That is the entire value loop: a business scenario → atomic expectations → measured behavior →
-evidence-backed failure → a deterministic block on promotion.
+The sequence is: business scenario → atomic expectations → measured behavior → evidence-backed
+failure → deterministic block on promotion.
 
 ---
 

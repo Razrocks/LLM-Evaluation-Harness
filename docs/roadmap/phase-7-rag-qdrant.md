@@ -5,8 +5,8 @@
 
 ## Goal
 
-Evaluate a retrieval-augmented workflow end to end, and — the whole point — **separate retrieval
-quality from generation quality** so a wrong answer can be attributed to the right stage.
+Evaluate a retrieval-augmented workflow end to end, and **separate retrieval quality from
+generation quality** so a wrong answer can be attributed to the stage that caused it.
 
 ## Why a vector store is justified here (and only here)
 

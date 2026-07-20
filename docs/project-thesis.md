@@ -79,14 +79,13 @@ HuggingFace models** identically (M5); **CatBoost** and a **HuggingFace transfor
 join as ML baselines compared against LLMs on the same held-out labels (M9). See
 [technology-map.md](technology-map.md).
 
-## The proof
+## Acceptance criteria
 
-The first proof is deliberately humble and deliberately hard to fake:
+The first checkpoint is accepted when the platform catches a structured-output regression,
+preserves the evidence, reports which cases and assertions failed, and blocks promotion under a
+deterministic gate.
 
-> The platform catches **one** meaningful structured-output regression, preserves the evidence,
-> explains exactly why it failed, and blocks promotion under a deterministic contract.
-
-The complete proof is that the *same standalone contracts* also evaluate retrieval, grounded
-generation, governed tool use, classifiers, cost, latency, and regressions — without ever
-requiring another product. Not "we can call many models," but "we can prove, case by case,
-whether a configuration got better or worse."
+The complete system is accepted when the same standalone contracts also evaluate retrieval,
+grounded generation, governed tool use, classifiers, cost, latency, and regressions without
+requiring another product. The measurable claim is per-case: whether a given configuration got
+better or worse, and by which named metric.

@@ -1,18 +1,18 @@
-"""The offline regression demo — the platform's first proof, in one command.
+"""Offline end-to-end regression run.
 
-Story:
+Executes five steps against the recorded fixture targets:
 
 1. validate the frozen dataset release;
-2. run the **approved baseline** configuration -> gate **PASS**;
+2. run the approved baseline configuration -> expect gate PASS;
 3. approve that run as the baseline;
-4. run a **degraded candidate** that still returns schema-valid JSON but drops required
-   missing-information items -> gate **FAIL**, with case-level evidence;
-5. run the **corrected** configuration -> gate **PASS** again.
+4. run a degraded candidate that returns schema-valid JSON but drops required
+   missing-information items -> expect gate FAIL, with case-level evidence;
+5. run the corrected configuration -> expect gate PASS.
 
-It needs no API credentials and is fully deterministic. The demo is *self-verifying*: it
-returns a non-zero exit code if the story does not hold, so it doubles as a smoke test.
+Requires no API credentials and is deterministic. Returns a non-zero exit code if any gate
+outcome differs from the expected result, so it can be used as a smoke test.
 
-Output is deliberately ASCII-only so it renders on a default Windows (cp1252) console.
+Output is ASCII-only so it renders on a default Windows (cp1252) console.
 """
 
 from __future__ import annotations
@@ -82,8 +82,8 @@ def _show_failed_rules(outcome: RunOutcome, echo: Echo) -> None:
 def run_demo(  # noqa: PLR0915
     *, repo_root: Path, runs_dir: Path | None = None, echo: Echo = print
 ) -> int:
-    # Deliberately linear and long: this function *is* the narrative, and splitting the five
-    # numbered steps into helpers would make the story harder to follow than it is to read.
+    # Linear by design: the five numbered steps map 1:1 to the printed output, so splitting
+    # them into helpers would obscure the correspondence without reducing complexity.
     ok = True
 
     echo(_RULE)
@@ -176,9 +176,9 @@ def run_demo(  # noqa: PLR0915
 
     echo(_RULE)
     if ok:
-        echo("RESULT: PASS -> FAIL -> PASS.")
-        echo("The gate caught the regression, explained it with case-level evidence, and")
-        echo("blocked promotion. No API keys were used.")
+        echo("RESULT: all gate outcomes matched expectations (PASS, FAIL, PASS).")
+        echo("The degraded configuration was rejected with case-level evidence.")
+        echo("No API credentials were used.")
         echo(_RULE)
         return 0
     echo("RESULT: demo did not hold - unexpected gate outcomes")

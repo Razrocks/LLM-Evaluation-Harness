@@ -4,9 +4,9 @@ This document is the visual backbone of the platform. It shows how the pieces fi
 how a single evaluation flows from a case to a gate decision, how the domain entities relate,
 and how each object moves through its lifecycle. Every other doc links back here.
 
-> If you read only one diagram, read [The evaluation pipeline](#2-the-evaluation-pipeline). It
-> is the spine of the whole system: a case goes in, evidence and a gate decision come out, and
-> nothing in between is allowed to hide a failure.
+[The evaluation pipeline](#2-the-evaluation-pipeline) is the core control flow: a case goes in,
+evidence and a gate decision come out. Raw output is persisted before parsing, and every
+assertion produces a result.
 
 ---
 
@@ -154,7 +154,7 @@ How the canonical business entities connect. A **Target System** exposes **Workf
 **Workflow** owns **Eval Cases**; approved cases are frozen into a **Dataset Release**; a
 release plus an execution configuration and scoring plan form an **Eval Plan**; running a plan
 produces an **Eval Run** of many **Case Executions**, each yielding **Assertion Results** backed
-by **Evidence**. See [business-ontology.md](business-ontology.md) for the full narrative.
+by **Evidence**. Each entity is defined in [business-ontology.md](business-ontology.md).
 
 ```mermaid
 erDiagram
