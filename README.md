@@ -45,9 +45,12 @@ is deterministic.
 
 ## Status
 
-**First checkpoint (Milestones 0–4): complete.** 131 tests pass; `ruff` and `mypy --strict` are
-clean. See [`docs/implementation-status.md`](docs/implementation-status.md) for the authoritative
-breakdown of what is implemented versus planned — this README does not claim anything beyond it.
+**Milestones 0–4 complete. Milestone 5 (provider adapters + CI) is code-complete, with no live
+model call or CI run executed yet.** 168 tests pass; `ruff` and `mypy --strict` are clean.
+
+[`docs/implementation-status.md`](docs/implementation-status.md) is the authoritative record of
+what is implemented, what is partially implemented, and what has not been started. Read it before
+relying on any capability listed below.
 
 The first vertical slice evaluates a platform-owned **Structured Request Triage** workflow
 (`reference.request_triage.v1`): messy request text + supporting documents → strict JSON
@@ -69,6 +72,11 @@ The first vertical slice evaluates a platform-owned **Structured Request Triage*
 | Baseline approval + candidate comparison | `src/ai_eval/baselines/` |
 | Deterministic gate: PASS / FAIL / INVALID + exit codes | `src/ai_eval/gates/` |
 | CLI + offline regression demo | `src/ai_eval/cli/`, `src/ai_eval/demo.py` |
+| Versioned, content-addressed prompt registry | `prompts/`, `src/ai_eval/prompts/` |
+| Provider adapters — Claude, ChatGPT, Gemini, local HuggingFace *(contract-tested against a fake client; no live API call executed)* | `src/ai_eval/targets/providers/` |
+| Versioned price tables; cost reported only when computable | `src/ai_eval/pricing/` |
+| Repeated-trial variance (library-only, not on the CLI) | `src/ai_eval/trials.py` |
+| CI workflows *(committed; not yet run)* | `.github/workflows/` |
 
 ## Commands
 
@@ -106,7 +114,7 @@ no API keys.
 ## Verify
 
 ```bash
-uv run pytest -q        # 131 passed
+uv run pytest -q        # 168 passed
 uv run ruff check .
 uv run mypy src
 ```
@@ -118,23 +126,6 @@ pipeline, entity map, state machines), then
 [`docs/business-ontology.md`](docs/business-ontology.md) for the domain and use cases. The
 first workload's contract is in
 [`docs/workflow-contracts/reference-request-triage-v1.md`](docs/workflow-contracts/reference-request-triage-v1.md).
-
-## Known limitations
-
-- **12 synthetic cases**, not 30–50. Expanding the dataset is the next dataset task.
-- **No live model has been evaluated yet.** The Claude / ChatGPT / Gemini / HuggingFace adapters
-  are written and contract-tested against an injected fake client, but the SDKs are optional
-  extras that are not installed and **no real API call has been made**. Run one with
-  `uv sync --extra providers` and `configs/plans/reference_request_triage_provider.json`.
-- **CI workflows exist but have never run** — `.github/workflows/` is committed; the repo owner
-  operates GitHub Actions.
-- **Latency is ~0 and cost is `null`** for recorded targets (instant, and no token usage to
-  price). Cost requires a versioned price table and is never estimated; the shipped example
-  table is an explicit placeholder, not real provider pricing.
-- No case in dataset v1 declares an `evidence_reference_valid` assertion, so that metric has a
-  zero denominator and is deliberately not gated yet.
-- No database, API, vector store, agent sandbox, ML baseline, or dashboard yet — Milestones
-  6–10, documented in [`docs/roadmap/`](docs/roadmap/) and **not** built.
 
 ## License
 
