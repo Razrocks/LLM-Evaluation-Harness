@@ -8,6 +8,7 @@ from .evaluate import (
     EXIT_PASS,
     GateResult,
     RuleResult,
+    RuleStatus,
     evaluate_gate,
 )
 from .policy import GatePolicy, GateRule, load_gate_policy
@@ -20,6 +21,7 @@ __all__ = [
     "GateResult",
     "GateRule",
     "RuleResult",
+    "RuleStatus",
     "evaluate_gate",
     "load_gate_policy",
 ]

@@ -20,15 +20,20 @@ import typer
 
 from ai_eval.baselines import (
     Baseline,
-    approve_baseline,
-    build_baseline_candidate,
     compare_snapshots,
     render_comparison_markdown,
 )
 from ai_eval.datasets import load_cases_dir, load_cases_jsonl, validate_dataset
 from ai_eval.domain import GateOutcome
 from ai_eval.execution import EvalPlan
-from ai_eval.gates import EXIT_FAIL, EXIT_INVALID, EXIT_PASS, evaluate_gate, load_gate_policy
+from ai_eval.gates import (
+    EXIT_FAIL,
+    EXIT_INVALID,
+    EXIT_PASS,
+    RuleStatus,
+    evaluate_gate,
+    load_gate_policy,
+)
 from ai_eval.harness import run_and_evaluate
 from ai_eval.metrics import MetricSummary
 from ai_eval.targets import get_recorded_target
@@ -118,9 +123,10 @@ def run_cmd(
     run_id: str | None = typer.Option(None, help="Explicit run id."),
 ) -> None:
     """Execute a plan: invoke the target, score, report, optionally compare and gate."""
+    eval_plan = _load_plan(plan)
     outcome = run_and_evaluate(
-        _load_plan(plan),
-        get_recorded_target(_load_plan(plan).target.adapter_id),
+        eval_plan,
+        get_recorded_target(eval_plan.target.adapter_id),
         repo_root=REPO_ROOT,
         runs_dir=runs_dir,
         run_id=run_id,
@@ -136,7 +142,7 @@ def run_cmd(
     if outcome.gate is not None:
         _echo_gate(outcome.gate.outcome)
         for rule in outcome.gate.rule_results:
-            if rule.status is not GateOutcome.PASS:
+            if rule.status not in (RuleStatus.PASS, RuleStatus.SKIPPED):
                 typer.echo(f"  [{rule.status}] {rule.rule_id}: {rule.message}")
         raise typer.Exit(outcome.gate.exit_code)
 
@@ -165,8 +171,8 @@ def compare_cmd(
     out.write_text(render_comparison_markdown(report), encoding="utf-8")
     typer.echo(f"comparison written: {out}")
     typer.echo(f"compatible: {report.compatible}")
-    typer.echo(f"newly failing: {report.newly_failing_cases or '—'}")
-    typer.echo(f"recovered: {report.recovered_cases or '—'}")
+    typer.echo(f"newly failing: {report.newly_failing_cases or '(none)'}")
+    typer.echo(f"recovered: {report.recovered_cases or '(none)'}")
 
 
 @app.command("gate")
@@ -180,7 +186,7 @@ def gate_cmd(
                f"({result.passed_rules} passed, {result.failed_rules} failed, "
                f"{result.invalid_rules} invalid)")
     for rule in result.rule_results:
-        if rule.status is not GateOutcome.PASS:
+        if rule.status not in (RuleStatus.PASS, RuleStatus.SKIPPED):
             typer.echo(f"  [{rule.status}] {rule.rule_id}: {rule.message}")
     raise typer.Exit(result.exit_code)
 

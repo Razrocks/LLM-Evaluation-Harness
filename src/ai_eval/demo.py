@@ -27,7 +27,7 @@ from ai_eval.baselines import approve_baseline, build_baseline_candidate
 from ai_eval.datasets import load_cases_dir, validate_dataset
 from ai_eval.domain import GateOutcome
 from ai_eval.execution import EvalPlan
-from ai_eval.gates import load_gate_policy
+from ai_eval.gates import RuleStatus, load_gate_policy
 from ai_eval.harness import RunOutcome, run_and_evaluate
 from ai_eval.targets import get_recorded_target
 
@@ -75,7 +75,7 @@ def _manifest_field(outcome: RunOutcome, key: str) -> str:
 def _show_failed_rules(outcome: RunOutcome, echo: Echo) -> None:
     assert outcome.gate is not None
     for rule in outcome.gate.rule_results:
-        if rule.status is not GateOutcome.PASS:
+        if rule.status not in (RuleStatus.PASS, RuleStatus.SKIPPED):
             echo(f"     [{str(rule.status).upper()}] {rule.rule_id}: {rule.message}")
 
 

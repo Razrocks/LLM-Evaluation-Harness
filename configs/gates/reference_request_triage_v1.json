@@ -1,7 +1,7 @@
 {
   "gate_id": "reference_request_triage_v1_ci",
   "gate_version": "1.0.0",
-  "description": "First-slice deterministic regression gate for reference.request_triage.v1. Thresholds are starting defaults calibrated against the recorded_pass baseline, not universal truths. No cost rule is included here: cost requires a versioned price table, and a rule over an absent metric would correctly yield INVALID rather than PASS.",
+  "description": "First-slice deterministic regression gate for reference.request_triage.v1. Thresholds are starting defaults calibrated against the recorded_pass baseline, not universal truths. Two metrics are deliberately NOT gated here: cost_per_case_usd (requires a versioned price table, absent offline) and evidence_reference_validity (no case in dataset v1 declares an evidence_reference_valid assertion, so its denominator is 0). A rule over an absent metric correctly yields INVALID rather than PASS, so the rule is omitted until the metric exists.",
   "rules": [
     {
       "rule_id": "no_critical_case_failures",
@@ -49,13 +49,6 @@
       "type": "metric_minimum",
       "metric": "needs_attention_accuracy",
       "minimum": 0.90,
-      "severity": "major"
-    },
-    {
-      "rule_id": "evidence_reference_validity_floor",
-      "type": "metric_minimum",
-      "metric": "evidence_reference_validity",
-      "minimum": 0.98,
       "severity": "major"
     },
     {
