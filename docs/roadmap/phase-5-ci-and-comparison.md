@@ -1,6 +1,8 @@
 # Phase 5 (M5) — CI & Multi-Configuration Comparison
 
-**Status:** ⬜ Planned. Not started. Begins only after M4 is green.
+**Status:** 🟡 Code complete (2026-07-18); live provider run and CI run still pending — both are
+owner-operated. See [`../implementation-status.md`](../implementation-status.md) for exactly what
+was built versus what remains.
 
 ## Goal
 

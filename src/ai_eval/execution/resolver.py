@@ -52,6 +52,11 @@ def resolve_eval_plan(
     repo_root: Path,
     repo_revision: str | None = None,
     now: datetime | None = None,
+    price_table_id: str | None = None,
+    price_table_hash: str | None = None,
+    prompt_spec_id: str | None = None,
+    prompt_spec_hash: str | None = None,
+    model_config_refs: dict[str, object] | None = None,
 ) -> ResolvedPlan:
     now = now or datetime.now(UTC)
 
@@ -104,6 +109,11 @@ def resolve_eval_plan(
         scoring_plan_hash=content_hash({"scoring_plan_id": plan.scoring_plan_id}),
         gate_id=plan.gate_id,
         baseline_id=plan.baseline_id,
+        prompt_spec_id=prompt_spec_id,
+        prompt_spec_hash=prompt_spec_hash,
+        model_config=dict(model_config_refs) if model_config_refs else None,
+        price_table_id=price_table_id,
+        price_table_hash=price_table_hash,
         environment={"python": sys.version.split()[0], "platform": platform.system().lower()},
         created_at=now,
         status=RunStatus.CREATED,

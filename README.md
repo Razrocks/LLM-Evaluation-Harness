@@ -122,14 +122,19 @@ first workload's contract is in
 ## Known limitations
 
 - **12 synthetic cases**, not 30–50. Expanding the dataset is the next dataset task.
-- **No live model has been evaluated yet.** Recorded fixture targets only; Claude / ChatGPT /
-  Gemini / HuggingFace adapters arrive in M5 behind the same target contract.
-- **Latency is captured but ~0** (recorded targets are instant) and **cost is `null`** — cost
-  requires a versioned price table, and is never estimated. Both gain real values at M5.
+- **No live model has been evaluated yet.** The Claude / ChatGPT / Gemini / HuggingFace adapters
+  are written and contract-tested against an injected fake client, but the SDKs are optional
+  extras that are not installed and **no real API call has been made**. Run one with
+  `uv sync --extra providers` and `configs/plans/reference_request_triage_provider.json`.
+- **CI workflows exist but have never run** — `.github/workflows/` is committed; the repo owner
+  operates GitHub Actions.
+- **Latency is ~0 and cost is `null`** for recorded targets (instant, and no token usage to
+  price). Cost requires a versioned price table and is never estimated; the shipped example
+  table is an explicit placeholder, not real provider pricing.
 - No case in dataset v1 declares an `evidence_reference_valid` assertion, so that metric has a
   zero denominator and is deliberately not gated yet.
-- No CI, database, API, vector store, agent sandbox, ML baseline, or dashboard yet — those are
-  Milestones 5–10, documented in [`docs/roadmap/`](docs/roadmap/) and **not** built.
+- No database, API, vector store, agent sandbox, ML baseline, or dashboard yet — Milestones
+  6–10, documented in [`docs/roadmap/`](docs/roadmap/) and **not** built.
 
 ## License
 

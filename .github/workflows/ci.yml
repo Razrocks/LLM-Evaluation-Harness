@@ -1,0 +1,64 @@
+name: CI
+
+# Fully offline: no API keys, no secrets, no network calls to model providers.
+# The regression gate runs against recorded fixture targets, so a failure here is a real
+# quality regression rather than a flaky provider.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies (core + dev only — no provider SDKs)
+        run: uv sync
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Type check
+        run: uv run mypy src
+
+      - name: Tests
+        run: uv run pytest -q
+
+      - name: Validate dataset release
+        run: uv run ai-eval dataset validate --dataset datasets/reference/request_triage/v1
+
+      - name: Offline regression demo (baseline PASS -> degraded FAIL -> corrected PASS)
+        run: uv run ai-eval demo --runs-dir runs
+
+      - name: Regression gate on the baseline configuration
+        # Exit codes are the contract: 0 PASS, 1 FAIL, 2 INVALID. A non-zero exit fails CI.
+        run: |
+          uv run ai-eval run \
+            --plan configs/plans/reference_request_triage_baseline.json \
+            --gate configs/gates/reference_request_triage_v1.json \
+            --runs-dir runs --run-id ci_${{ github.run_id }}
+
+      - name: Upload run artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-runs
+          path: runs/
+          retention-days: 14

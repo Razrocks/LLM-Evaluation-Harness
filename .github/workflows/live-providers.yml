@@ -1,0 +1,61 @@
+name: Live provider evaluation (opt-in)
+
+# MANUAL ONLY. This is the one workflow that spends money and needs credentials, so it never
+# runs on push or pull_request. Ordinary CI (ci.yml) must stay green without any of this.
+#
+# Required repository secrets (only for the providers you select):
+#   ANTHROPIC_API_KEY   OPENAI_API_KEY   GOOGLE_API_KEY
+
+on:
+  workflow_dispatch:
+    inputs:
+      plan:
+        description: Eval plan JSON to run
+        required: true
+        default: configs/plans/reference_request_triage_provider.json
+      gate:
+        description: Gate policy JSON
+        required: true
+        default: configs/gates/reference_request_triage_v1.json
+
+permissions:
+  contents: read
+
+jobs:
+  live-eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: live-providers # add required reviewers here to control spend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies (core + provider SDKs)
+        run: uv sync --extra providers
+
+      - name: Run the plan against the live provider
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        run: |
+          uv run ai-eval run \
+            --plan "${{ inputs.plan }}" \
+            --gate "${{ inputs.gate }}" \
+            --runs-dir runs --run-id live_${{ github.run_id }}
+
+      - name: Upload run artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-eval-runs
+          path: runs/
+          retention-days: 30

@@ -37,7 +37,7 @@ from ai_eval.gates import (
 )
 from ai_eval.harness import run_and_evaluate
 from ai_eval.metrics import MetricSummary
-from ai_eval.targets import get_recorded_target
+from ai_eval.targets import build_target
 
 app = typer.Typer(add_completion=False, help="Standalone AI evaluation & reliability platform.")
 dataset_app = typer.Typer(help="Dataset release operations.")
@@ -130,7 +130,7 @@ def run_cmd(
     eval_plan = _load_plan(plan)
     outcome = run_and_evaluate(
         eval_plan,
-        get_recorded_target(eval_plan.target.adapter_id),
+        build_target(eval_plan.target, repo_root=REPO_ROOT),
         repo_root=REPO_ROOT,
         runs_dir=runs_dir,
         run_id=run_id,

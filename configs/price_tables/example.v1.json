@@ -1,0 +1,12 @@
+{
+  "price_table_id": "example",
+  "version": "v1",
+  "currency": "USD",
+  "effective_date": "2026-07-01",
+  "source": "PLACEHOLDER - not real pricing",
+  "notes": "ILLUSTRATIVE VALUES ONLY. These numbers are invented placeholders so the cost pipeline can be exercised and tested; they are NOT any provider's real prices. Before reporting cost for a live run, replace this file with a table transcribed from each provider's official pricing page, set 'source' to that page, and bump 'version'. A wrong price table produces confidently wrong cost metrics, so this file is deliberately marked unusable for real reporting.",
+  "prices": {
+    "example-small": { "input_per_1k": 0.001, "output_per_1k": 0.002 },
+    "example-large": { "input_per_1k": 0.01, "output_per_1k": 0.03 }
+  }
+}

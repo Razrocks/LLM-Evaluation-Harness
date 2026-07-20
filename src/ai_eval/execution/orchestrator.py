@@ -85,13 +85,17 @@ def execute_plan(
     run_id: str | None = None,
     repo_revision: str | None = None,
     clock: Clock | None = None,
+    manifest_refs: dict[str, Any] | None = None,
 ) -> RunResult:
+    """Execute a plan. ``manifest_refs`` pins optional provenance (prompt spec, model config,
+    price table) into the run manifest so a live-provider run stays reproducible."""
     tick: Clock = clock or (lambda: datetime.now(UTC))
     run_id = run_id or f"run_{uuid.uuid4().hex[:12]}"
     runs_dir = runs_dir or (repo_root / "runs")
 
     resolved = resolve_eval_plan(
-        plan, run_id=run_id, repo_root=repo_root, repo_revision=repo_revision, now=tick()
+        plan, run_id=run_id, repo_root=repo_root, repo_revision=repo_revision, now=tick(),
+        **(manifest_refs or {}),
     )
     writer = RunArtifactWriter(runs_dir, run_id)
     running = resolved.manifest.model_copy(update={"status": RunStatus.RUNNING})

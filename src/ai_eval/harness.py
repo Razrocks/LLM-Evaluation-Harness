@@ -17,6 +17,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from ai_eval.baselines import (
     Baseline,
@@ -28,6 +29,7 @@ from ai_eval.evaluation import ExecutionObservation, RunEvaluation, evaluate_raw
 from ai_eval.execution import EvalPlan, execute_plan
 from ai_eval.execution.orchestrator import Clock
 from ai_eval.gates import GatePolicy, GateResult, evaluate_gate
+from ai_eval.pricing import PriceTable, cost_for_usage
 from ai_eval.reporting import write_evaluation_reports
 from ai_eval.targets import TargetAdapter
 
@@ -57,10 +59,25 @@ def run_and_evaluate(
     clock: Clock | None = None,
     baseline: Baseline | None = None,
     gate_policy: GatePolicy | None = None,
+    price_table: PriceTable | None = None,
 ) -> RunOutcome:
+    # Provenance that only exists for live-provider runs; pinned into the manifest.
+    adapter_config = getattr(adapter, "config", None)
+    prompt_spec = getattr(adapter, "prompt_spec", None)
+    model_id = getattr(adapter_config, "model", None)
+    manifest_refs: dict[str, Any] = {}
+    if prompt_spec is not None:
+        manifest_refs["prompt_spec_id"] = prompt_spec.ref
+        manifest_refs["prompt_spec_hash"] = prompt_spec.content_hash
+    if adapter_config is not None:
+        manifest_refs["model_config_refs"] = adapter_config.model_dump(mode="json")
+    if price_table is not None:
+        manifest_refs["price_table_id"] = price_table.ref
+        manifest_refs["price_table_hash"] = price_table.content_hash
+
     run = execute_plan(
         plan, adapter, repo_root=repo_root, runs_dir=runs_dir, run_id=run_id,
-        repo_revision=repo_revision, clock=clock,
+        repo_revision=repo_revision, clock=clock, manifest_refs=manifest_refs or None,
     )
     cases_by_id = {c.case_id: c for c in run.cases}
 
@@ -72,7 +89,10 @@ def run_and_evaluate(
         raw_text = raw_path.read_text(encoding="utf-8") if raw_path.exists() else ""
         invoked_ok = record.error is None and raw_text != ""
         items.append((case, raw_text if invoked_ok else None, invoked_ok))
-        observations[record.case_id] = ExecutionObservation(latency_ms=record.latency_ms)
+        observations[record.case_id] = ExecutionObservation(
+            latency_ms=record.latency_ms,
+            cost_usd=cost_for_usage(price_table, model_id, record.usage),
+        )
 
     evaluation = evaluate_raw_outputs(items, observations)
     report_paths = write_evaluation_reports(run.run_dir, evaluation)

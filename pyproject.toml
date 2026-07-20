@@ -61,6 +61,9 @@ ignore = ["PLR0913"]  # allow wide constructors for frozen manifest/record model
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["PLR2004"]  # literal values in assertions are expected in tests
 "src/ai_eval/cli/*" = ["B008"]  # typer.Option(...) in defaults is the Typer idiom
+# Provider SDKs are optional extras; importing them lazily at the call site is the design,
+# so the core install and CI never require them.
+"src/ai_eval/targets/providers/clients.py" = ["PLC0415"]
 
 [tool.mypy]
 python_version = "3.12"
@@ -72,7 +75,17 @@ warn_unused_ignores = true
 disallow_untyped_defs = true
 
 [[tool.mypy.overrides]]
-module = ["sklearn.*", "catboost.*", "qdrant_client.*", "sentence_transformers.*"]
+# Optional extras: not installed in the core environment, imported lazily at call sites.
+module = [
+    "sklearn.*",
+    "catboost.*",
+    "qdrant_client.*",
+    "sentence_transformers.*",
+    "anthropic.*",
+    "openai.*",
+    "google.*",
+    "transformers.*",
+]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
