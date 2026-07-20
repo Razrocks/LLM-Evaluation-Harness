@@ -11,6 +11,8 @@ critical rules, then quality floors, then deltas and operational budgets.
 
 from __future__ import annotations
 
+from enum import StrEnum
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from ai_eval.baselines import ComparisonReport
@@ -25,13 +27,23 @@ EXIT_FAIL = 1
 EXIT_INVALID = 2
 
 
+class RuleStatus(StrEnum):
+    """Per-rule outcome. ``SKIPPED`` means the rule is not applicable to this run (e.g. a
+    baseline-delta rule evaluated without a baseline) — it never affects the gate outcome."""
+
+    PASS = "pass"
+    FAIL = "fail"
+    INVALID = "invalid"
+    SKIPPED = "skipped"
+
+
 class RuleResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     rule_id: str
     type: GateRuleType
     severity: Severity
-    status: GateOutcome
+    status: RuleStatus
     metric: str | None = None
     observed: float | None = None
     threshold: float | None = None
@@ -48,6 +60,7 @@ class GateResult(BaseModel):
     passed_rules: int = 0
     failed_rules: int = 0
     invalid_rules: int = 0
+    skipped_rules: int = 0
 
     @property
     def exit_code(self) -> int:
