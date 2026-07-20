@@ -188,7 +188,9 @@ def _operational_metrics(inputs: list[CaseMetricInput]) -> list[Metric]:
             numerator=sum(costs) if costs else None,
             denominator=len(costs),
             aggregation="mean",
-            missing_data_rule="requires a versioned price table; omitted when absent, never estimated",
+            missing_data_rule=(
+                "requires a versioned price table; omitted when absent, never estimated"
+            ),
         )
     )
     return metrics

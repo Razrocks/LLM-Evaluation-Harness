@@ -24,6 +24,7 @@ from ai_eval.baselines import (
     render_comparison_markdown,
 )
 from ai_eval.datasets import load_cases_dir, load_cases_jsonl, validate_dataset
+from ai_eval.demo import run_demo
 from ai_eval.domain import GateOutcome
 from ai_eval.execution import EvalPlan
 from ai_eval.gates import (
@@ -103,7 +104,10 @@ def dataset_validate(
 ) -> None:
     """Validate every case in a dataset release."""
     cases_dir = dataset / "cases"
-    cases = load_cases_dir(cases_dir) if cases_dir.exists() else load_cases_jsonl(dataset / "cases.jsonl")
+    cases = (
+        load_cases_dir(cases_dir) if cases_dir.exists()
+        else load_cases_jsonl(dataset / "cases.jsonl")
+    )
     report = validate_dataset(cases, require_approved=require_approved)
     if report.issues:
         for issue in report.issues:
@@ -196,8 +200,6 @@ def demo_cmd(
     runs_dir: Path | None = typer.Option(None, help="Where to write runs/ (default ./runs)."),
 ) -> None:
     """The offline regression story: baseline PASS -> degraded FAIL -> corrected PASS."""
-    from ai_eval.demo import run_demo
-
     code = run_demo(repo_root=REPO_ROOT, runs_dir=runs_dir, echo=typer.echo)
     raise typer.Exit(code)
 

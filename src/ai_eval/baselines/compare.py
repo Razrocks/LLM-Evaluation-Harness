@@ -83,7 +83,9 @@ def compare_snapshots(
     """Compare from plain snapshots, so a stored run's artifacts can be compared later."""
     warnings: list[str] = []
     if not baseline.is_usable:
-        warnings.append(f"baseline '{baseline.baseline_id}' is not approved (state={baseline.state})")
+        warnings.append(
+            f"baseline '{baseline.baseline_id}' is not approved (state={baseline.state})"
+        )
     if baseline.workflow_ref != candidate_workflow_ref:
         warnings.append(
             f"workflow mismatch: baseline '{baseline.workflow_ref}' vs candidate "
@@ -137,7 +139,8 @@ def render_comparison_markdown(report: ComparisonReport) -> str:
     if report.warnings:
         lines += ["", "## ⚠ Compatibility warnings", ""]
         lines += [f"- {w}" for w in report.warnings]
-    lines += ["", "## Metric deltas", "", "| metric | baseline | candidate | delta |", "|---|---|---|---|"]
+    lines += ["", "## Metric deltas", ""]
+    lines += ["| metric | baseline | candidate | delta |", "|---|---|---|---|"]
     for d in report.deltas:
         lines.append(f"| {d.metric} | {d.baseline_value} | {d.candidate_value} | {d.delta} |")
     lines += ["", "## Case movement", ""]

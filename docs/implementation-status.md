@@ -4,10 +4,10 @@ Updated each sprint. Truth source for what is implemented vs planned. Last updat
 
 ## Current position
 
-**Sprint 3 (Milestone 3 — Parsing, scoring, reporting): ✅ complete.**
-Cadence: sprint-by-sprint, pause after each milestone. First checkpoint = M0–M4 (offline, no
-API keys). Do not widen until M4 is green. **Next: await go-ahead for M4 (baseline, gate, CLI,
-demo) — the last milestone of the first checkpoint.**
+**FIRST CHECKPOINT (Milestones 0–4): ✅ COMPLETE.**
+The platform catches a real structured-output regression, explains it with case-level evidence,
+and blocks promotion — offline, with no API credentials. **Next: await go-ahead for M5** (CI +
+live provider adapters), the first milestone beyond the checkpoint.
 
 ## Milestone status
 
@@ -17,62 +17,62 @@ demo) — the last milestone of the first checkpoint.**
 | M1 — Dataset & domain core | ✅ complete |
 | M2 — Execution & evidence capture | ✅ complete |
 | M3 — Parsing, scoring, reporting | ✅ complete |
-| M4 — Baseline, gate, CLI, demo | ⬜ not started (next) |
-| M5–M10 + external adapters | ⬜ roadmap only |
+| M4 — Baseline, gate, CLI, demo | ✅ complete |
+| M5 — CI + provider adapters (Claude/GPT/Gemini/HF) | ⬜ not started (next) |
+| M6–M10 + external adapters | ⬜ roadmap only |
 
 ## Verification (all green)
 
 ```bash
-python -m uv run pytest -q          # 104 passed
+python -m uv run pytest -q          # 131 passed
 python -m uv run ruff check .        # clean
-python -m uv run mypy src            # clean (40 source files)
+python -m uv run mypy src            # clean (50 source files)
+python -m uv run ai-eval demo        # exit 0: PASS -> FAIL -> PASS
 ```
 
-## M3 deliverables
+## M4 deliverables
 
-- **`parsing/`** — `TriageOutput` Pydantic model (`request_triage.output.v1`, required fields have
-  no defaults) + strict `parse_triage_output` keeping empty / malformed-JSON / schema-invalid
-  **distinct** (ADR 0002), no silent repair.
-- **`scoring/`** — versioned deadline normalizer (`normalize_iso_date` + `resolve_relative_weekday`,
-  no wall-clock, boundary-tested); tiny deterministic selector resolver; `AssertionResult`;
-  missing-info canonical vocab + versioned alias map; **11 scorers + registry** (schema_valid,
-  normalized_date_equal, deadline_kind_equal, categorical_equal [risk under/over], boolean_equal,
-  set_precision_recall_f1, required_task_coverage, evidence_reference_valid, evidence_span_support,
-  unsupported_material_claim_absent, prohibited_value_absent); `evaluate_case` guarantees one
-  result per assertion (unknown scorer → `SCORER_ERROR`).
-- **`evidence/`** — `EvidenceIndex` (reference validity, span-bounds, deterministic containment
-  support).
-- **`metrics/`** — aggregator with explicit numerator/denominator/missing-data per metric;
-  **scikit-learn** for risk macro-F1 + confusion matrix; invocation errors excluded from quality
-  numerators.
-- **`failures/`** — controlled failure inventory (`FailureRecord`, severity-ordered, code counts).
-- **`evaluation/`** — `evaluate_raw_outputs` pipeline (parse → score → aggregate → failures).
-- **`reporting/`** — JSONL/JSON/CSV(pandas)/Markdown writers; byte-for-byte reproducible.
-- **Tests (104 total)** — parser distinctions; normalizer boundaries (week/month/year, tz);
-  every scorer pass+fail + invariant #8 + SCORER_ERROR; metric hand-calc **cross-checked against
-  scikit-learn**; golden run of all 5 recorded targets + report reproducibility.
+- **`baselines/`** — `Baseline` manifest snapshotting an approved run's metrics + per-case
+  outcomes; explicit `approve_baseline` (CANDIDATE→ACTIVE; re-approval rejected — the top score
+  never auto-promotes); `compare_to_baseline` / `compare_snapshots` producing metric deltas,
+  newly-failing and recovered cases, failure-code deltas, and **compatibility warnings**.
+- **`gates/`** — versioned `GatePolicy` (thresholds in data, not code) + deterministic evaluator
+  returning PASS/FAIL/INVALID with per-rule evidence. Rule-level `SKIPPED` distinguishes "no
+  baseline supplied, rule not applicable" from "cannot judge". INVALID takes precedence over FAIL.
+- **Operational metrics** — `latency_mean/p50/p95_ms` (numpy percentiles over captured
+  `latency_ms`) and `cost_per_case_usd` (only with a versioned price table; never estimated).
+- **`harness.py`** — the one module spanning all layers: execute → **re-read raw evidence from
+  disk** → parse/score/aggregate → report → compare → gate.
+- **`cli/`** — Typer `ai-eval`: `dataset validate`, `run`, `compare`, `gate`, `demo`.
+  Exit codes **0 PASS / 1 FAIL / 2 INVALID**, verified end to end.
+- **`demo.py`** — self-verifying offline story (returns non-zero if PASS→FAIL→PASS doesn't hold);
+  ASCII-only output so it renders on a default Windows cp1252 console.
+- **`configs/`** — gate policy (spec §21 defaults), 3 eval plans, price-table README.
+- **Tests (+27, 131 total)** — gate semantics incl. INVALID-vs-SKIPPED and precedence; baseline
+  approval + comparison; shipped configs validated against **both** JSON Schema and runtime model;
+  CLI exit-code contract via `CliRunner`; demo end-to-end.
 
-## Verified behaviors (the core proof, working)
+## First-checkpoint exit criteria — all met
 
-recorded_pass → 100% pass, 0 critical failures. missing-information regression → schema_pass_rate
-**stays 1.0** but missing_information_recall **collapses to 0.0** with `MISSING_INFO_OMITTED` — the
-exact "valid JSON, silently worse" regression. deadline/evidence/schema regressions each isolate
-their codes; risk metrics report **None** (not 0) when nothing parses.
+Contracts + ontology checked in ✓ · schemas validate examples ✓ · dataset release immutable and
+content-addressed ✓ · raw output retained before parsing ✓ · deterministic scorers tested ✓ ·
+every assertion produces an explainable result ✓ · metrics expose denominators ✓ · baseline and
+candidate can be compared ✓ · gate passes/fails/invalidates correctly ✓ · **an intentionally
+degraded target is caught** ✓ · demo works without credentials ✓ · tests pass ✓ · README separates
+implemented from planned ✓.
 
-## Deferred to M4 (next)
+## Known limitations (carried forward)
 
-Baseline manifest + comparison; deterministic gate evaluator (PASS/FAIL/INVALID + exit codes)
-consuming `gate_policy.v1`; Typer CLI (`dataset`/`run`/`compare`/`gate`/`demo`); wiring the
-M2 orchestrator raw-capture → M3 evaluation → reports into one run; offline regression demo
-(PASS → FAIL → PASS).
-
-## Notes
-
-- Ruff strict (spec §3.5.1). **User action (non-blocking):** drop the 3 source docs into `docs/spec/`.
+- 12 seed cases, not 30–50.
+- No live model evaluated yet; recorded fixtures only.
+- Latency ≈ 0 and cost `null` offline (honest, not faked) — real at M5.
+- No case declares an `evidence_reference_valid` assertion, so that metric's denominator is 0 and
+  it is deliberately not gated. Adding it is a dataset-v2 task.
+- **User action (non-blocking):** drop the 3 source spec docs into `docs/spec/`.
 
 ## Confirmed build decisions
 
-Package `ai_eval` (src layout) · Python 3.12 · Pydantic v2 · **uv + Typer** · **scikit-learn +
-numpy in core** · 12 seed cases (expand to 30–50 later) · sprint-by-sprint pause-each · docs
-domain-grade + Mermaid · all GitHub actions operated by repo owner · targets under test:
-Claude/ChatGPT/Gemini/HF (M5) + CatBoost/HF classifier (M9).
+Package `ai_eval` (src layout) · Python 3.12 · Pydantic v2 · uv + Typer · scikit-learn + numpy in
+core · 12 seed cases · sprint-by-sprint pause-each · docs domain-grade + Mermaid · ruff strict ·
+all GitHub actions operated by repo owner · targets under test: Claude/ChatGPT/Gemini/HF (M5) +
+CatBoost/HF classifier (M9).

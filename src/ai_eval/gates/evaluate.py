@@ -82,7 +82,9 @@ def _rr(rule: GateRule, status: RuleStatus, message: str, *, observed: float | N
     )
 
 
-def _metric_rule(rule: GateRule, summary: MetricSummary) -> RuleResult:
+def _metric_rule(rule: GateRule, summary: MetricSummary) -> RuleResult:  # noqa: PLR0911
+    # Guard-clause style: each early return is one distinct, named INVALID/FAIL condition.
+    # Collapsing them would obscure exactly why a rule could not be judged.
     metrics = summary.by_name()
     if rule.metric is None or rule.metric not in metrics:
         return _rr(rule, RuleStatus.INVALID, f"metric '{rule.metric}' not produced by this run")
@@ -113,7 +115,8 @@ def _metric_rule(rule: GateRule, summary: MetricSummary) -> RuleResult:
                observed=metric.value, threshold=threshold)
 
 
-def _delta_rule(rule: GateRule, comparison: ComparisonReport | None) -> RuleResult:
+def _delta_rule(rule: GateRule, comparison: ComparisonReport | None) -> RuleResult:  # noqa: PLR0911
+    # Guard-clause style, as above: every early return names a distinct reason.
     if comparison is None:
         if rule.requires_baseline:
             return _rr(rule, RuleStatus.SKIPPED, "no baseline supplied; rule not applicable")
@@ -161,7 +164,10 @@ def evaluate_gate(
     for rule in policy.rules:
         if rule.type is GateRuleType.CRITICAL_CASE_COUNT_MAX:
             results.append(_critical_rule(rule, summary))
-        elif rule.type in (GateRuleType.BASELINE_DELTA_MINIMUM, GateRuleType.BASELINE_DELTA_MAXIMUM):
+        elif rule.type in (
+            GateRuleType.BASELINE_DELTA_MINIMUM,
+            GateRuleType.BASELINE_DELTA_MAXIMUM,
+        ):
             results.append(_delta_rule(rule, comparison))
         else:
             results.append(_metric_rule(rule, summary))

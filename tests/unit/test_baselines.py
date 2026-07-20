@@ -27,7 +27,8 @@ def _evaluate(target_name: str):
     adapter = get_recorded_target(target_name)
     items = []
     for case in CASES:
-        res = adapter.invoke(case, InvocationContext(run_id="t", case_execution_id=f"t:{case.case_id}"))
+        ctx = InvocationContext(run_id="t", case_execution_id=f"t:{case.case_id}")
+        res = adapter.invoke(case, ctx)
         items.append((case, res.raw_output, res.succeeded))
     return evaluate_raw_outputs(items)
 

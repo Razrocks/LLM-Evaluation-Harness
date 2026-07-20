@@ -79,7 +79,11 @@ def _show_failed_rules(outcome: RunOutcome, echo: Echo) -> None:
             echo(f"     [{str(rule.status).upper()}] {rule.rule_id}: {rule.message}")
 
 
-def run_demo(*, repo_root: Path, runs_dir: Path | None = None, echo: Echo = print) -> int:
+def run_demo(  # noqa: PLR0915
+    *, repo_root: Path, runs_dir: Path | None = None, echo: Echo = print
+) -> int:
+    # Deliberately linear and long: this function *is* the narrative, and splitting the five
+    # numbered steps into helpers would make the story harder to follow than it is to read.
     ok = True
 
     echo(_RULE)
