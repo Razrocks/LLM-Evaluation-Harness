@@ -9,7 +9,12 @@ from .compare import (
     compare_to_baseline,
     render_comparison_markdown,
 )
-from .models import Baseline, approve_baseline, build_baseline_candidate
+from .models import (
+    Baseline,
+    approve_baseline,
+    build_baseline_candidate,
+    build_baseline_from_snapshot,
+)
 
 __all__ = [
     "Baseline",
@@ -17,6 +22,7 @@ __all__ = [
     "MetricDelta",
     "approve_baseline",
     "build_baseline_candidate",
+    "build_baseline_from_snapshot",
     "compare_snapshots",
     "compare_to_baseline",
     "render_comparison_markdown",

@@ -65,6 +65,33 @@ def build_baseline_candidate(
     )
 
 
+def build_baseline_from_snapshot(
+    *,
+    baseline_id: str,
+    workflow_ref: str,
+    run_id: str,
+    dataset_release_id: str,
+    dataset_release_hash: str,
+    metrics: dict[str, float | None],
+    case_passed: dict[str, bool],
+    critical_case_failures: int,
+    limitations: list[str] | None = None,
+) -> Baseline:
+    """Build a baseline **candidate** from a stored run's snapshots (no re-execution needed)."""
+    return Baseline(
+        baseline_id=baseline_id,
+        workflow_ref=workflow_ref,
+        run_id=run_id,
+        dataset_release_id=dataset_release_id,
+        dataset_release_hash=dataset_release_hash,
+        state=BaselineState.CANDIDATE,
+        limitations=limitations or [],
+        metrics=metrics,
+        case_passed=case_passed,
+        critical_case_failures=critical_case_failures,
+    )
+
+
 def approve_baseline(
     baseline: Baseline, *, approver: str, rationale: str, approved_at: datetime
 ) -> Baseline:

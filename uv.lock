@@ -79,6 +79,7 @@ worker = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "httpx" },
     { name = "mypy" },
     { name = "pandas-stubs" },
     { name = "pytest" },
@@ -127,6 +128,7 @@ provides-extras = ["providers", "rag", "ml", "api", "worker"]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "httpx", specifier = ">=0.27" },
     { name = "mypy", specifier = ">=1.10" },
     { name = "pandas-stubs" },
     { name = "pytest", specifier = ">=8.2" },
