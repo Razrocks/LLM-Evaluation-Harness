@@ -1,7 +1,7 @@
 # Phase 6 (M6) — Persistence, API & Workers
 
-**Status:** ⬜ Planned. Not started. Begins only after the first checkpoint (M0–M4) is green and
-M5 (CI + comparison) is in place.
+**Status:** 🟡 Code complete (2026-07-18); tested on in-memory SQLite. PostgreSQL, Redis, and
+Docker are unexercised (owner-operated). See [`../implementation-status.md`](../implementation-status.md).
 
 ## Goal
 

@@ -43,11 +43,12 @@ Legend — **Status:** ✅ implemented · 🟡 in progress · ⬜ planned (decla
 | CatBoost | Tabular risk/attention/escalation baseline | M9 | `ml/` | held-out eval + model card | Optional | ⬜ |
 | PyTorch / Datasets / Evaluate | Transformer training runtime + data + metrics | M9 | `ml/` | training/eval test | Optional | ⬜ |
 | PEFT / TRL (LoRA) | Optional fine-tuning after a measured failure cluster | M9 | `ml/` | fine-tune gate | Optional | ⬜ |
-| PostgreSQL / SQLAlchemy / Alembic | Canonical relational store + migrations | M6 | `storage/`, `api/` | persistence tests | Optional | ⬜ |
-| FastAPI / Uvicorn | Application API | M6 | `api/` | contract tests | Optional | ⬜ |
-| Celery / Redis | Durable async jobs (sync fallback for local) | M6 | `workers/` | worker tests | Optional | ⬜ |
+| SQLAlchemy 2.0 / Alembic | Relational models + migrations (SQLite + Postgres) | M6 | `storage/`, `migrations/` | `test_storage.py` (SQLite) | Optional | ✅ |
+| PostgreSQL / psycopg | Canonical relational store for the service | M6 | `storage/`, `docker-compose.yml` | driver installed; **no Postgres run** | Optional | 🟡 |
+| FastAPI / Uvicorn | Application API | M6 | `api/` | `test_api.py` (TestClient) | Optional | ✅ |
+| Celery / Redis | Durable async jobs (sync fallback is default) | M6 | `workers/` | sync path tested; **Celery not run live** | Optional | 🟡 |
 | Next.js / React / shadcn / TanStack / Recharts | Dashboard (reads canonical API; no client-side metrics) | M10 | `web/` | e2e | Optional | ⬜ |
-| Docker / Docker Compose | Local Postgres/Qdrant/Redis/API/worker profiles | M6–M10 | `docker-compose.yml` | compose up | Optional | ⬜ |
+| Docker / Docker Compose | Local Postgres/Qdrant/Redis/API/worker profiles | M6–M10 | `Dockerfile`, `docker-compose.yml` | files written; **not run** | Optional | 🟡 |
 | GitHub Actions | Lint/type/test + offline regression gate (operated by repo owner) | M5 | `.github/workflows/ci.yml`, `live-providers.yml` | workflows written; **not yet run** | Optional | 🟡 |
 
 ## Fine-tune base model (M9, decision pending at that milestone)

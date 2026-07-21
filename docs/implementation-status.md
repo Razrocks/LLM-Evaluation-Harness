@@ -4,81 +4,86 @@ Updated each sprint. Truth source for what is implemented vs planned. Last updat
 
 ## Current position
 
-**Sprint 5 (Milestone 5 — CI + multi-provider comparison): ✅ code complete, live path unexercised.**
-The provider layer, prompt registry, price tables, repeated-trial variance, and CI workflows are
-built and tested offline. **No live model call has been made and no CI run has executed** — both
-are owner-operated. **Next: await go-ahead for M6** (persistence, API, workers).
+**Sprint 6 (Milestone 6 — Persistence, API, workers): ✅ code complete, Postgres path unexercised.**
+Storage, the application service, the FastAPI app, and the sync worker are built and fully
+tested on in-memory SQLite. **No PostgreSQL, Redis, or Docker has been run** (owner-operated).
+**Next: await go-ahead for M7** (RAG + Qdrant).
 
 ## Milestone status
 
 | Milestone | Status |
 |---|---|
-| M0 — Spec lock (docs + schemas) | ✅ complete |
+| M0 — Spec lock | ✅ complete |
 | M1 — Dataset & domain core | ✅ complete |
 | M2 — Execution & evidence capture | ✅ complete |
 | M3 — Parsing, scoring, reporting | ✅ complete |
 | M4 — Baseline, gate, CLI, demo | ✅ complete |
 | M5 — CI + provider adapters | 🟡 code complete; live run + CI run pending (owner) |
-| M6 — Persistence, API, workers | ⬜ not started (next) |
-| M7–M10 + external adapters | ⬜ roadmap only |
+| M6 — Persistence, API, workers | 🟡 code complete; Postgres/Redis/Docker unexercised (owner) |
+| M7 — RAG + Qdrant | ⬜ not started (next) |
+| M8–M10 + external adapters | ⬜ roadmap only |
 
 ## Verification (all green)
 
 ```bash
-python -m uv run pytest -q          # 168 passed
-python -m uv run ruff check .        # clean
-python -m uv run mypy src            # clean (59 source files)
-python -m uv run ai-eval demo        # exit 0: PASS -> FAIL -> PASS
+python -m uv sync --extra api        # FastAPI + SQLAlchemy + Alembic + psycopg (offline)
+python -m uv run pytest -q           # 191 passed
+python -m uv run ruff check .         # clean
+python -m uv run mypy src             # clean (74 source files)
+python -m uv run ai-eval demo         # exit 0: PASS -> FAIL -> PASS
 ```
 
-## M5 deliverables
+## M6 deliverables
 
-- **`prompts/`** — versioned, **content-addressed** instruction pair
-  (`prompts/reference/request_triage/v1/{system,user}.txt`) plus a dependency-free renderer.
-  Documents are sorted so the request hash can't change with input ordering. The same prompt
-  hash is pinned in every run manifest, which is what makes a cross-model comparison fair.
-- **`targets/providers/`** — `ProviderTargetAdapter` (retry **only** on transient kinds, never on
-  a semantic failure; attempts/usage/latency/config captured as evidence) plus four clients:
-  **AnthropicClient (Claude), OpenAIClient (ChatGPT), GeminiClient, HuggingFaceClient (local)**.
-  SDKs are lazy-imported optional extras, and SDK exceptions are normalized into
-  `ProviderErrorKind` → controlled `FailureCode`s without importing SDK exception types.
-- **`targets/factory.py`** — one `build_target()` resolving recorded fixtures *and* provider
-  targets from a plan, so runner/CLI/CI never branch on target kind. API keys are never read or
-  stored by platform code; each SDK reads its own env var.
-- **`pricing/`** — versioned `PriceTable` + `cost_for_usage`. Cost is `None` whenever it cannot
-  be computed honestly (no table, unknown model, missing tokens) — never estimated. The shipped
-  `configs/price_tables/example.v1.json` is explicitly marked PLACEHOLDER, not real pricing.
-- **Manifest pinning** — prompt spec id/hash, model config, and price table id/hash now resolve
-  into the run manifest (invariant #13).
-- **`trials.py`** — repeated-trial execution + per-metric mean/stdev/min/max. Metrics absent from
-  any run are excluded rather than silently averaged.
-- **`.github/workflows/`** — `ci.yml` (offline: lint, types, tests, dataset validation, demo, and
-  the regression gate — **no secrets**) and `live-providers.yml` (`workflow_dispatch` only,
-  gated by a protected environment, the only place credentials appear).
-- **Tests (+14, 168 total)** — provider contract via injected fake client: evidence capture,
-  retry-then-succeed, auth fails fast, `RETRY_EXHAUSTED`, **bad JSON never retried**, prompt sent
-  matches the rendered spec, SDK-exception classification; factory resolution + error cases;
-  prompt determinism/hashing; cost honesty; trial variance.
+- **`config.py`** — env-driven settings; **SQLite default**, so the API and persistence run
+  with no PostgreSQL and no Redis.
+- **`storage/`** — SQLAlchemy 2.0 models (`eval_runs`, `baselines`, `audit_events`; JSON columns
+  work on SQLite + Postgres), engine (StaticPool for in-memory SQLite), and repositories.
+  Completed runs are **insert-only** (invariant #12; re-publish is a no-op, not an overwrite);
+  audit is **append-only**.
+- **`identity.py`** — roles + permission matrix + `authorize`. The three high-impact actions
+  (execute run, approve baseline, evaluate gate) are scoped; everyone may view.
+- **`service/`** — `ApplicationService`: role-authorized, audited use cases that reuse the CLI's
+  `harness.run_and_evaluate` and the domain gate/baseline logic. Each use case is one
+  transactional scope.
+- **`api/`** — FastAPI app: `/health`, `/capabilities`, `POST|GET /eval-runs`,
+  `/eval-runs/{id}[/results]`, `POST /baselines`, `POST /gates/evaluate`, `/audit/{id}`.
+  Principal from `X-Actor-Id`/`X-Role`; `PermissionDenied → 403`, `RunNotFound → 404`. The
+  browser/client is never authoritative — the service computes everything.
+- **`workers/`** — `SyncJobRunner` (default, no infra) + optional import-guarded Celery task.
+- **Alembic** — `alembic.ini` + `migrations/env.py` targeting the ORM metadata + an
+  autogenerated initial revision (3 tables + indexes).
+- **Docker** — `Dockerfile` (uv, non-root) + `docker-compose.yml` (postgres, redis, api, worker)
+  with a note that the offline core needs none of it.
+- **CI** — `ci.yml` now installs `--extra api` and stays offline (SQLite); provider SDKs remain
+  excluded.
+- **Tests (+23, 191 total)** — API round-trips on in-memory SQLite via `TestClient` (role
+  denial 403, run persisted + retrievable, degraded run records FAIL gate + `MISSING_INFO_OMITTED`,
+  404s, baseline approval role-gated + audited, idempotent re-publish, gate endpoint); storage
+  immutability + append-only audit + active-baseline lookup; the authorization matrix. All
+  guarded with `importorskip` so the offline core run is unaffected.
 
-## Explicitly NOT done in M5 (owner-operated or deferred)
+## Explicitly NOT done in M6 (owner-operated or deferred)
 
-- **No live provider call has been executed.** SDKs are not installed (`uv sync --extra providers`).
-- **No CI run has executed** — workflows are files; the repo owner runs them.
-- Multi-configuration side-by-side comparison **report** (comparing two live configs in one
-  artifact) is not built; `compare_snapshots` supports it, the reporting surface does not.
-- `--trials` is not exposed on the CLI yet; `run_trials()` is library-only.
+- **No PostgreSQL, Redis, or Docker has been run** — SQLite + sync path only. `docker-compose up`
+  and `alembic upgrade head` against Postgres are owner-operated.
+- The Celery worker task is written and import-guarded but **never executed against a live
+  broker**.
+- API surface is the core set above; corpora/classifier/fine-tune endpoints wait for their
+  milestones. `/eval-runs` executes synchronously (queue submission is the worker's job, not
+  wired into the endpoint yet).
 
-## Known limitations (carried forward)
+## Carried-forward limitations
 
 - 12 seed cases, not 30–50.
-- Latency ≈ 0 and cost `null` for recorded targets (honest, not faked).
-- No case declares an `evidence_reference_valid` assertion → that metric's denominator is 0 and
-  it is deliberately not gated. Dataset-v2 task.
+- M5 provider adapters: no live API call executed; CI never run.
+- Latency ≈ 0, cost `null` for recorded targets (honest).
+- `evidence_reference_valid` metric ungated (zero denominator in dataset v1).
 - **User action (non-blocking):** drop the 3 source spec docs into `docs/spec/`.
 
 ## Confirmed build decisions
 
 Package `ai_eval` (src layout) · Python 3.12 · Pydantic v2 · uv + Typer · scikit-learn + numpy in
-core · stdlib prompt templating (no Jinja2 dep) · 12 seed cases · sprint-by-sprint pause-each ·
-docs domain-grade + Mermaid · ruff strict · all GitHub actions operated by repo owner · targets
-under test: Claude/ChatGPT/Gemini/HF (M5) + CatBoost/HF classifier (M9).
+core · SQLite default / Postgres for service · sync worker default, Celery optional · sprint-by-
+sprint pause-each · docs domain-grade + Mermaid · ruff strict · all GitHub actions + infra
+operated by repo owner · targets under test: Claude/ChatGPT/Gemini/HF (M5) + CatBoost/HF (M9).

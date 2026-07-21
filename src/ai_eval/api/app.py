@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
 from ai_eval.config import load_settings
@@ -49,9 +50,7 @@ def create_app(service: ApplicationService | None = None) -> FastAPI:
     app.state.service = service
 
     @app.exception_handler(PermissionDenied)
-    async def _denied(_: Any, exc: PermissionDenied) -> Any:  # noqa: ANN401
-        from fastapi.responses import JSONResponse
-
+    async def _denied(_: Any, exc: PermissionDenied) -> JSONResponse:
         return JSONResponse(status_code=403, content={"detail": str(exc)})
 
     @app.get("/health", response_model=HealthResponse)

@@ -98,6 +98,10 @@ ignore_missing_imports = true
 testpaths = ["tests"]
 pythonpath = ["src"]
 addopts = "-ra"
+filterwarnings = [
+    # Starlette's TestClient warns to migrate off httpx; not our code, not actionable here.
+    "ignore:.*httpx.*starlette.testclient.*:Warning",
+]
 
 [tool.coverage.run]
 source = ["ai_eval"]
