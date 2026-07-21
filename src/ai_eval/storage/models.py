@@ -68,7 +68,7 @@ class BaselineRow(Base):
 
 
 class AuditEventRow(Base):
-    """Append-only record of privileged state transitions (invariant: history is never rewritten)."""
+    """Append-only record of privileged state transitions; history is never rewritten."""
 
     __tablename__ = "audit_events"
 

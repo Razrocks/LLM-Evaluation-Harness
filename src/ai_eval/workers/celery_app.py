@@ -25,7 +25,7 @@ def build_celery_app(redis_url: str) -> Any:  # pragma: no cover - requires the 
 
     app = Celery("ai_eval", broker=redis_url, backend=redis_url)
 
-    @app.task(name="ai_eval.execute_run", acks_late=True, max_retries=3)
+    @app.task(name="ai_eval.execute_run", acks_late=True, max_retries=3)  # type: ignore[misc]
     def execute_run_task(
         actor_id: str, role: str, plan_json: dict[str, Any],
         gate_policy_json: dict[str, Any] | None = None, run_id: str | None = None,

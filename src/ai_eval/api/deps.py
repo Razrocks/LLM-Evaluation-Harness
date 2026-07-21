@@ -15,7 +15,7 @@ from ai_eval.service import ApplicationService
 
 def get_service(request: Request) -> ApplicationService:
     service = getattr(request.app.state, "service", None)
-    if service is None:  # pragma: no cover - misconfiguration guard
+    if not isinstance(service, ApplicationService):  # pragma: no cover - misconfiguration guard
         raise HTTPException(status_code=500, detail="application service not configured")
     return service
 

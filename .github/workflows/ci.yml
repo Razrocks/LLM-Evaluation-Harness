@@ -29,8 +29,10 @@ jobs:
       - name: Set up Python
         run: uv python install 3.12
 
-      - name: Install dependencies (core + dev only — no provider SDKs)
-        run: uv sync
+      - name: Install dependencies (core + dev + api extra — still no provider SDKs, no secrets)
+        # The `api` extra (FastAPI + SQLAlchemy) is offline: persistence/API tests run on
+        # in-memory SQLite. Provider SDKs (`--extra providers`) are deliberately NOT installed.
+        run: uv sync --extra api
 
       - name: Lint
         run: uv run ruff check .

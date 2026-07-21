@@ -28,7 +28,7 @@ def build_engine(settings: Settings | None = None) -> Engine:
     kwargs: dict[str, object] = {"connect_args": {"check_same_thread": False}, "future": True}
     if ":memory:" in settings.database_url:
         kwargs["poolclass"] = StaticPool
-    return create_engine(settings.database_url, **kwargs)  # type: ignore[arg-type]
+    return create_engine(settings.database_url, **kwargs)
 
 
 def create_all(engine: Engine) -> None:
