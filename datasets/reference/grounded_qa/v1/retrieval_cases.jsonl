@@ -1,0 +1,3 @@
+{"query_id": "gqa_001", "query": "How many business days do refunds take to be issued?", "relevant_chunk_ids": ["refund_policy:1:chunk-0"], "graded_relevance": {"refund_policy:1:chunk-0": 3.0}, "answerable": true}
+{"query_id": "gqa_002", "query": "Who must approve production database access and for how long?", "relevant_chunk_ids": ["access_policy:1:chunk-0"], "graded_relevance": {"access_policy:1:chunk-0": 3.0}, "answerable": true}
+{"query_id": "gqa_003", "query": "What is required when a vendor invoice exceeds the approved quote?", "relevant_chunk_ids": ["vendor_policy:1:chunk-0"], "graded_relevance": {"vendor_policy:1:chunk-0": 3.0}, "answerable": true}

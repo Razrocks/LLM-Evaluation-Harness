@@ -1,0 +1,1 @@
+Production database access requires explicit owner approval and is granted for a maximum of 24 hours. Every access grant is logged and reviewed by the security team each week.

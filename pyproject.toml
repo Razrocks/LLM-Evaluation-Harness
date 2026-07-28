@@ -97,7 +97,9 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
-addopts = "-ra"
+# Disable the deepeval / langsmith pytest plugins: they run telemetry/login on startup and
+# hang collection. We invoke those libraries through our own adapters, never their plugins.
+addopts = "-ra -p no:deepeval -p no:langsmith_plugin"
 filterwarnings = [
     # Starlette's TestClient warns to migrate off httpx; not our code, not actionable here.
     "ignore:.*httpx.*starlette.testclient.*:Warning",
