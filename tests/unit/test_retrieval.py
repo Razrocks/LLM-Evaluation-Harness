@@ -12,9 +12,9 @@ import pytest
 from ai_eval.retrieval import (
     EmbeddingConfig,
     HashingEmbedder,
-    InMemoryVectorIndex,
     IndexIntegrityError,
     IndexPoint,
+    InMemoryVectorIndex,
     RetrievalConfig,
     Retriever,
     build_corpus_from_dir,
@@ -37,7 +37,9 @@ def _corpus():
     return build_corpus_from_dir(CORPUS_DIR, corpus_id="business_docs", corpus_version="1")
 
 
-def _config(embedder: HashingEmbedder, corpus_version: str = "1", top_k: int = 3) -> RetrievalConfig:
+def _config(
+    embedder: HashingEmbedder, corpus_version: str = "1", top_k: int = 3
+) -> RetrievalConfig:
     return RetrievalConfig(
         retrieval_config_id="test_cfg",
         corpus_id="business_docs",
@@ -189,7 +191,9 @@ class _FakeSentenceTransformer:
 def test_sentence_transformer_adapter_via_injected_model() -> None:
     from ai_eval.retrieval import SentenceTransformerEmbedder
 
-    embedder = SentenceTransformerEmbedder(model="fake/model", model_obj=_FakeSentenceTransformer())
+    embedder = SentenceTransformerEmbedder(
+        model="fake/model", model_obj=_FakeSentenceTransformer()
+    )
     assert embedder.config.dimension == 4
     assert embedder.config.model == "fake/model"
     vectors = embedder.embed(["hello", "world"])

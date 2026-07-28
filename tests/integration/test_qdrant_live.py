@@ -44,7 +44,6 @@ def test_qdrant_roundtrip_recall_and_integrity() -> None:
         HashingEmbedder,
         IndexIntegrityError,
         QdrantVectorIndex,
-        RetrievalConfig,
         Retriever,
         build_corpus_from_dir,
         build_index,

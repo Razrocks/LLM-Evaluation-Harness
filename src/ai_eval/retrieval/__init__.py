@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from .chunker import CHUNKER_VERSION, chunk_corpus
 from .embeddings import Embedder, HashingEmbedder, SentenceTransformerEmbedder
-from .index import InMemoryVectorIndex, IndexPoint, QdrantVectorIndex, ScoredPoint, VectorIndex
+from .index import IndexPoint, InMemoryVectorIndex, QdrantVectorIndex, ScoredPoint, VectorIndex
 from .ingest import build_corpus_from_dir, ingest_document, load_corpus, load_retrieval_cases
 from .metrics import (
     RetrievalCase,

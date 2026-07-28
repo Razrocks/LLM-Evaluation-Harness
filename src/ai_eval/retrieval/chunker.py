@@ -25,8 +25,7 @@ def _chunk_document(
         return []
     step = max(window - overlap, 1)
     chunks: list[Chunk] = []
-    index = 0
-    for start_word in range(0, len(words), step):
+    for index, start_word in enumerate(range(0, len(words), step)):
         window_words = words[start_word : start_word + window]
         if not window_words:
             break
@@ -50,7 +49,6 @@ def _chunk_document(
                 chunk_hash=f"sha256:{sha256_hex(text)}",
             )
         )
-        index += 1
         if start_word + window >= len(words):
             break
     return chunks

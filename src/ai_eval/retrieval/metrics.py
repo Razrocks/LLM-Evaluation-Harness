@@ -9,6 +9,7 @@ explicit denominators.
 from __future__ import annotations
 
 import math
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -76,7 +77,7 @@ class RetrievalMetricSummary(BaseModel):
     ndcg_at_k: float | None
     empty_retrieval_rate: float
     duplicate_chunk_rate: float
-    per_query: list[dict] = Field(default_factory=list)
+    per_query: list[dict[str, Any]] = Field(default_factory=list)
 
 
 def _mean(values: list[float]) -> float | None:
@@ -86,14 +87,14 @@ def _mean(values: list[float]) -> float | None:
 def evaluate_retrieval(
     pairs: list[tuple[RetrievalCase, list[str]]], *, k: int
 ) -> RetrievalMetricSummary:
-    """Score ``(case, ranked_chunk_ids)`` pairs into an aggregate summary with per-query drill-down."""
+    """Score ``(case, ranked_chunk_ids)`` pairs into an aggregate summary + per-query drill-down."""
     recalls: list[float] = []
     precisions: list[float] = []
     rrs: list[float] = []
     ndcgs: list[float] = []
     empties = 0
     dup_rates: list[float] = []
-    per_query: list[dict] = []
+    per_query: list[dict[str, Any]] = []
 
     for case, ranked in pairs:
         relevant = set(case.relevant_chunk_ids)
