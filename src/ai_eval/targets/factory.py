@@ -61,10 +61,11 @@ def build_target(
         str(config.get("prompt_spec_id", "request_triage")),
         str(config.get("prompt_spec_version", "v1")),
     )
+    raw_temp = config.get("temperature", 0.0)
     model_config = ModelConfig(
         provider=str(provider),
         model=str(model),
-        temperature=float(config.get("temperature", 0.0)),
+        temperature=None if raw_temp is None else float(raw_temp),
         max_output_tokens=int(config.get("max_output_tokens", 2048)),
         timeout_s=float(config.get("timeout_s", 60.0)),
         max_attempts=int(config.get("max_attempts", 3)),

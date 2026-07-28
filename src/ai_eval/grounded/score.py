@@ -10,6 +10,7 @@ and the answer is still wrong, that is a generation failure. The two are never c
 from __future__ import annotations
 
 from enum import StrEnum
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -70,7 +71,8 @@ def score_grounded(
             codes.append(FailureCode.UNSUPPORTED_MATERIAL_CLAIM)  # answered without evidence
             unsupported.append("answered an unanswerable question")
         return GroundedCaseResult(
-            query_id=case.query_id, answerable=False, required_evidence_retrieved=required_retrieved,
+            query_id=case.query_id, answerable=False,
+            required_evidence_retrieved=required_retrieved,
             answer_fact_recall=None, citation_valid_rate=None, unsupported_claims=unsupported,
             abstention_correct=abstained, passed=passed,
             attribution=Attribution.OK if passed else Attribution.GENERATION,
@@ -135,7 +137,7 @@ class GroundedMetricSummary(BaseModel):
     correct_abstention_rate: float | None
     retrieval_attributed_failures: int
     generation_attributed_failures: int
-    per_query: list[dict] = Field(default_factory=list)
+    per_query: list[dict[str, Any]] = Field(default_factory=list)
 
 
 def _mean(values: list[float]) -> float | None:
@@ -159,7 +161,9 @@ def evaluate_grounded(results: list[GroundedCaseResult]) -> GroundedMetricSummar
             _mean([1.0 if r.abstention_correct else 0.0 for r in unanswerable])
             if unanswerable else None
         ),
-        retrieval_attributed_failures=sum(1 for r in results if r.attribution == Attribution.RETRIEVAL),
+        retrieval_attributed_failures=sum(
+            1 for r in results if r.attribution == Attribution.RETRIEVAL
+        ),
         generation_attributed_failures=sum(
             1 for r in results if r.attribution == Attribution.GENERATION
         ),

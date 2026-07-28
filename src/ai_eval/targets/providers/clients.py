@@ -56,15 +56,17 @@ class AnthropicClient:
 
     def complete(self, *, system: str, user: str, config: ModelConfig) -> ProviderResponse:
         client = self._ensure()
+        kwargs: dict[str, Any] = {
+            "model": config.model,
+            "max_tokens": config.max_output_tokens,
+            "system": system,
+            "messages": [{"role": "user", "content": user}],
+            "timeout": config.timeout_s,
+        }
+        if config.temperature is not None:  # current Claude models reject temperature (400)
+            kwargs["temperature"] = config.temperature
         try:
-            message = client.messages.create(
-                model=config.model,
-                max_tokens=config.max_output_tokens,
-                temperature=config.temperature,
-                system=system,
-                messages=[{"role": "user", "content": user}],
-                timeout=config.timeout_s,
-            )
+            message = client.messages.create(**kwargs)
         except ProviderError:
             raise
         except Exception as exc:
@@ -106,18 +108,20 @@ class OpenAIClient:
 
     def complete(self, *, system: str, user: str, config: ModelConfig) -> ProviderResponse:
         client = self._ensure()
+        kwargs: dict[str, Any] = {
+            "model": config.model,
+            "max_tokens": config.max_output_tokens,
+            "timeout": config.timeout_s,
+            "seed": config.seed,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+        }
+        if config.temperature is not None:  # newer models may reject non-default temperature
+            kwargs["temperature"] = config.temperature
         try:
-            completion = client.chat.completions.create(
-                model=config.model,
-                temperature=config.temperature,
-                max_tokens=config.max_output_tokens,
-                timeout=config.timeout_s,
-                seed=config.seed,
-                messages=[
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": user},
-                ],
-            )
+            completion = client.chat.completions.create(**kwargs)
         except ProviderError:
             raise
         except Exception as exc:
@@ -157,16 +161,18 @@ class GeminiClient:
 
     def complete(self, *, system: str, user: str, config: ModelConfig) -> ProviderResponse:
         client = self._ensure()
+        gen_config: dict[str, Any] = {
+            "system_instruction": system,
+            "max_output_tokens": config.max_output_tokens,
+            "response_mime_type": "application/json",
+        }
+        if config.temperature is not None:
+            gen_config["temperature"] = config.temperature
         try:
             response = client.models.generate_content(
                 model=config.model,
                 contents=user,
-                config={
-                    "system_instruction": system,
-                    "temperature": config.temperature,
-                    "max_output_tokens": config.max_output_tokens,
-                    "response_mime_type": "application/json",
-                },
+                config=gen_config,
             )
         except ProviderError:
             raise
@@ -209,12 +215,13 @@ class HuggingFaceClient:
     def complete(self, *, system: str, user: str, config: ModelConfig) -> ProviderResponse:
         pipe = self._ensure()
         prompt = f"{system}\n\n{user}\n"
+        sample = config.temperature is not None and config.temperature > 0
         try:
             outputs = pipe(
                 prompt,
                 max_new_tokens=config.max_output_tokens,
-                do_sample=config.temperature > 0,
-                temperature=config.temperature if config.temperature > 0 else None,
+                do_sample=sample,
+                temperature=config.temperature if sample else None,
                 return_full_text=False,
             )
         except ProviderError:

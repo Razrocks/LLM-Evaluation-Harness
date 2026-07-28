@@ -37,6 +37,8 @@ from ai_eval.gates import (
 )
 from ai_eval.harness import run_and_evaluate
 from ai_eval.metrics import MetricSummary
+from ai_eval.pricing import load_price_table
+from ai_eval.rag_demo import run_rag_demo
 from ai_eval.targets import build_target
 
 app = typer.Typer(add_completion=False, help="Standalone AI evaluation & reliability platform.")
@@ -123,6 +125,7 @@ def run_cmd(
     plan: Path = typer.Option(..., help="Eval plan JSON."),
     gate: Path | None = typer.Option(None, help="Gate policy JSON."),
     baseline: Path | None = typer.Option(None, help="Approved baseline JSON."),
+    price_table: Path | None = typer.Option(None, help="Versioned price table JSON for cost."),
     runs_dir: Path | None = typer.Option(None, help="Where to write runs/ (default ./runs)."),
     run_id: str | None = typer.Option(None, help="Explicit run id."),
 ) -> None:
@@ -136,12 +139,14 @@ def run_cmd(
         run_id=run_id,
         baseline=_load_baseline(baseline) if baseline else None,
         gate_policy=load_gate_policy(gate) if gate else None,
+        price_table=load_price_table(price_table) if price_table else None,
     )
     typer.echo(f"run_id: {outcome.run_id}")
     typer.echo(f"artifacts: {outcome.run_dir}")
     for metric in outcome.evaluation.summary.metrics:
         if metric.name in ("cases_passed", "schema_pass_rate", "missing_information_recall",
-                           "risk_recall.high", "deadline_accuracy"):
+                           "risk_recall.high", "deadline_accuracy", "invocation_success_rate",
+                           "latency_p95_ms", "cost_per_case_usd"):
             typer.echo(f"  {metric.name}: {metric.value}  (n={metric.denominator})")
     if outcome.gate is not None:
         _echo_gate(outcome.gate.outcome)
@@ -201,6 +206,13 @@ def demo_cmd(
 ) -> None:
     """Run the offline end-to-end check: baseline PASS, degraded FAIL, corrected PASS."""
     code = run_demo(repo_root=REPO_ROOT, runs_dir=runs_dir, echo=typer.echo)
+    raise typer.Exit(code)
+
+
+@app.command("rag-demo")
+def rag_demo_cmd() -> None:
+    """Run the offline RAG evaluation: retrieval + grounded generation, separately attributed."""
+    code = run_rag_demo(repo_root=REPO_ROOT, echo=typer.echo)
     raise typer.Exit(code)
 
 

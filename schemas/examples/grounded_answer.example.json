@@ -1,0 +1,12 @@
+{
+  "answer": "Refunds are issued within 14 business days of an approved return.",
+  "citations": [
+    {
+      "document_id": "refund_policy",
+      "chunk_id": "refund_policy:1:chunk-0",
+      "quote_span": [0, 64]
+    }
+  ],
+  "answerable": true,
+  "confidence": 0.9
+}

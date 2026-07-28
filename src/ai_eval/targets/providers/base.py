@@ -118,7 +118,9 @@ class ModelConfig(BaseModel):
 
     provider: str
     model: str
-    temperature: float = 0.0
+    #: None = omit the sampling parameter entirely. Current Claude models (Opus 5 / Sonnet 5)
+    #: and some others reject temperature/top_p with a 400, so provider plans set this to null.
+    temperature: float | None = 0.0
     max_output_tokens: int = 2048
     timeout_s: float = 60.0
     max_attempts: int = Field(default=3, ge=1)
