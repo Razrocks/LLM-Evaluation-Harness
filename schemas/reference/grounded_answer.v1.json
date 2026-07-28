@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-eval/schemas/reference/grounded_answer.v1.json",
+  "title": "grounded_answer.v1",
+  "description": "Candidate output for reference.grounded_qa.v1: an answer grounded in retrieved context, with citations that must resolve to retrieved chunks. 'answerable' lets the target abstain when the evidence is insufficient; abstention correctness is scored.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["answer", "citations", "answerable"],
+  "properties": {
+    "answer": { "type": "string" },
+    "citations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["document_id", "chunk_id"],
+        "properties": {
+          "document_id": { "type": "string", "minLength": 1 },
+          "chunk_id": { "type": "string", "minLength": 1 },
+          "quote_span": {
+            "type": ["array", "null"],
+            "items": { "type": "integer", "minimum": 0 },
+            "minItems": 2,
+            "maxItems": 2
+          }
+        }
+      }
+    },
+    "answerable": { "type": "boolean" },
+    "confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
+  }
+}

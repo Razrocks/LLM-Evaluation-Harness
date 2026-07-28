@@ -37,9 +37,11 @@ Legend — **Status:** ✅ implemented · 🟡 in progress · ⬜ planned (decla
 | Versioned price tables | Cost from recorded usage; never estimated | M5 | `src/ai_eval/pricing/`, `configs/price_tables/` | `test_prompts_and_pricing.py` | Optional | ✅ |
 | Repeated trials / variance | Spread across runs of one frozen plan | M5 | `src/ai_eval/trials.py` | `test_trials.py` | Optional | ✅ |
 | DeepEval / Ragas | Judge + RAG metric adapters (canonical defs stay ours) | M7 | `retrieval/`, `judges/` | RAG metric tests | Optional | ⬜ |
-| sentence-transformers (`all-MiniLM-L6-v2`) | Embeddings (pinned revision) | M7 | `retrieval/` | retrieval fixtures | Optional | ⬜ |
-| Qdrant + qdrant-client | Derived vector index | M7 | `retrieval/` | index build/query test | Optional | ⬜ |
-| pypdf / python-docx | Corpus ingestion | M7 | `retrieval/` | ingestion test | Optional | ⬜ |
+| sentence-transformers (`all-MiniLM-L6-v2`) | Embeddings (pinned revision) | M7 | `retrieval/embeddings.py` | adapter tested via injected fake; **real model not downloaded** | Optional | 🟡 |
+| Qdrant + qdrant-client | Derived vector index | M7 | `retrieval/index.py` | **live round-trip test ran + passed** against `docker compose up qdrant` | Optional | ✅ |
+| pypdf / python-docx | Corpus ingestion | M7 | `retrieval/ingest.py` | code path; no real PDF/DOCX exercised yet | Optional | 🟡 |
+| Deterministic chunker + retrieval metrics | Reproducible RAG eval (no framework) | M7 | `retrieval/chunker.py`, `metrics.py` | `test_retrieval.py` (13 tests) | Required | ✅ |
+| ragas / deepeval | Judge-based RAG metric adapters | M7 | (pending) | not built | Optional | ⬜ |
 | CatBoost | Tabular risk/attention/escalation baseline | M9 | `ml/` | held-out eval + model card | Optional | ⬜ |
 | PyTorch / Datasets / Evaluate | Transformer training runtime + data + metrics | M9 | `ml/` | training/eval test | Optional | ⬜ |
 | PEFT / TRL (LoRA) | Optional fine-tuning after a measured failure cluster | M9 | `ml/` | fine-tune gate | Optional | ⬜ |
