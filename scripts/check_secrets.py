@@ -59,12 +59,13 @@ BAD_NAMES = re.compile(
 SKIP_SUFFIX = {".png", ".jpg", ".jpeg", ".gif", ".ico", ".pdf", ".zip", ".gz",
                ".whl", ".so", ".pyd", ".bin", ".pt", ".safetensors", ".onnx"}
 MAX_BYTES = 2_000_000
+MIN_REDACT_LEN = 8  # values this short are shown fully masked
 
 
 def redact(s: str) -> str:
     """Show enough to locate the leak, never enough to reuse it."""
     s = s.strip()
-    if len(s) <= 8:
+    if len(s) <= MIN_REDACT_LEN:
         return "*" * len(s)
     return f"{s[:6]}...({len(s)} chars)"
 

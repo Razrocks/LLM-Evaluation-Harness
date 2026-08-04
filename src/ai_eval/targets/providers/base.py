@@ -125,6 +125,10 @@ class ModelConfig(BaseModel):
     timeout_s: float = 60.0
     max_attempts: int = Field(default=3, ge=1)
     seed: int | None = None
+    #: Client-side cap on outbound requests per minute, to respect provider free-tier rate
+    #: limits (e.g. Gemini free tier = 5 RPM). None = no throttle. The adapter spaces calls
+    #: by 60/requests_per_minute seconds; the wait is excluded from measured latency.
+    requests_per_minute: int | None = Field(default=None, ge=1)
     extra: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -174,11 +178,32 @@ class ProviderTargetAdapter(TargetAdapter):
         self.adapter_version = adapter_version
         self.target_workflow_ref = target_workflow_ref
         self._sleep: Sleeper = sleeper if sleeper is not None else time.sleep
+        self._min_interval_s = (
+            60.0 / model_config.requests_per_minute
+            if model_config.requests_per_minute
+            else 0.0
+        )
+        self._last_call_at: float | None = None
 
     def _backoff_seconds(self, attempt: int) -> float:
         """Deterministic exponential backoff (no jitter: reproducibility beats thundering-herd
         avoidance at eval scale, and tests inject a no-op sleeper anyway)."""
         return min(2.0 ** (attempt - 1), 8.0)
+
+    def _throttle(self) -> None:
+        """Space consecutive calls to honour a client-side requests-per-minute cap.
+
+        Used to stay under provider free-tier limits (e.g. Gemini free = 5 RPM) instead of
+        bursting and relying on 429 retries. The wait happens before latency timing starts, so
+        it never inflates measured model latency.
+        """
+        if self._min_interval_s <= 0:
+            return
+        if self._last_call_at is not None:
+            wait = self._min_interval_s - (time.perf_counter() - self._last_call_at)
+            if wait > 0:
+                self._sleep(wait)
+        self._last_call_at = time.perf_counter()
 
     def invoke(self, case: EvalCase, ctx: InvocationContext) -> TargetInvocationResult:
         rendered = render_prompt(self.prompt_spec, case.input)
@@ -186,6 +211,7 @@ class ProviderTargetAdapter(TargetAdapter):
         last_error: ProviderError | None = None
         response: ProviderResponse | None = None
 
+        self._throttle()
         started = time.perf_counter()
         for attempt_number in range(1, self.config.max_attempts + 1):
             attempt_started = time.perf_counter()

@@ -1,0 +1,12 @@
+{
+  "price_table_id": "google_free",
+  "version": "v1",
+  "currency": "USD",
+  "effective_date": "2026-08-01",
+  "source": "Google AI Studio free tier. Gemini Flash models are billed at $0 within free-tier rate limits (requests/day + tokens/min caps). Pinned by hash so a historical run's cost never changes if pricing updates.",
+  "notes": "Free-tier usage is $0.00. If you exceed free-tier limits and get billed, replace these with paid per-1k rates from https://ai.google.dev/pricing. Cost is computed from recorded input/output tokens only.",
+  "prices": {
+    "gemini-2.0-flash": { "input_per_1k": 0.0, "output_per_1k": 0.0 },
+    "gemini-2.5-flash": { "input_per_1k": 0.0, "output_per_1k": 0.0 }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "price_table_id": "hf_local",
+  "version": "v1",
+  "currency": "USD",
+  "effective_date": "2026-08-01",
+  "source": "Locally hosted HuggingFace models. No hosted API, so marginal per-token price is $0 (compute is the user's own machine). Recorded at $0 so a local target reports on the same cost axis as hosted providers.",
+  "notes": "Local inference has no per-token charge. Token counts still come from the tokenizer, so latency and usage remain comparable to hosted targets; only dollar cost is $0.",
+  "prices": {
+    "Qwen/Qwen2.5-0.5B-Instruct": { "input_per_1k": 0.0, "output_per_1k": 0.0 }
+  }
+}

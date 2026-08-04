@@ -1,0 +1,22 @@
+{
+  "eval_plan_id": "reference_request_triage_gemini",
+  "workflow_ref": "reference.request_triage.v1",
+  "dataset_manifest_path": "datasets/reference/request_triage/v1/manifest.json",
+  "target": {
+    "adapter_id": "provider_google_flash",
+    "adapter_version": "v1",
+    "output_schema_id": "request_triage.output.v1",
+    "config_refs": {
+      "provider": "google",
+      "model": "gemini-2.5-flash",
+      "temperature": 0.0,
+      "max_output_tokens": 4096,
+      "requests_per_minute": 4,
+      "prompt_spec_id": "request_triage",
+      "prompt_spec_version": "v1"
+    }
+  },
+  "scoring_plan_id": "reference_request_triage_scoring",
+  "gate_id": "reference_request_triage_v1_ci",
+  "baseline_id": "reference_request_triage_baseline_v1"
+}

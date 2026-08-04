@@ -70,6 +70,9 @@ def build_target(
         timeout_s=float(config.get("timeout_s", 60.0)),
         max_attempts=int(config.get("max_attempts", 3)),
         seed=config.get("seed"),
+        requests_per_minute=(
+            int(rpm) if (rpm := config.get("requests_per_minute")) is not None else None
+        ),
     )
     if client is None:
         client_cls = PROVIDER_CLIENTS[provider]
