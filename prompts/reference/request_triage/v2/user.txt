@@ -1,0 +1,10 @@
+request_id: {{request_id}}
+received_at: {{received_at}}
+reference_timezone: {{reference_timezone}}
+metadata: {{metadata}}
+
+message:
+{{message}}
+
+documents:
+{{documents}}
