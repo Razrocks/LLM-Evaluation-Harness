@@ -1,0 +1,135 @@
+{
+  "case_id": "request_triage_018",
+  "case_version": 1,
+  "workflow_ref": "reference.request_triage.v1",
+  "title": "Routine supply order with month-end relative deadline, low risk",
+  "input": {
+    "request_id": "req_018",
+    "message": "Could you order another box of A4 paper and some pens for the supply cabinet? Ideally before the end of the month.",
+    "received_at": "2026-07-20T11:00:00-04:00",
+    "reference_timezone": "America/Toronto",
+    "documents": [],
+    "metadata": {
+      "source": "email",
+      "priority_hint": "low",
+      "category_hint": "procurement"
+    }
+  },
+  "source_context": [
+    {
+      "evidence_id": "message#span-1",
+      "source_id": "message",
+      "start": 86,
+      "end": 113,
+      "text": "before the end of the month"
+    },
+    {
+      "evidence_id": "message#span-2",
+      "source_id": "message",
+      "start": 31,
+      "end": 39,
+      "text": "A4 paper"
+    }
+  ],
+  "expected": {
+    "deadline": {
+      "date": "2026-07-31",
+      "kind": "explicit_relative"
+    },
+    "risk_level": "low",
+    "missing_information": [],
+    "needs_attention": false
+  },
+  "assertions": [
+    {
+      "assertion_id": "schema",
+      "type": "schema_valid",
+      "scorer_ref": "schema_valid.v1",
+      "required": true,
+      "severity": "critical",
+      "on_unevaluable": "fail"
+    },
+    {
+      "assertion_id": "deadline_date",
+      "type": "normalized_date_equal",
+      "scorer_ref": "normalized_date_equal.v1",
+      "observed_selector": "$.deadline.date",
+      "expected": "2026-07-31",
+      "required": true,
+      "weight": 2.0,
+      "severity": "major",
+      "pass_threshold": 1.0,
+      "evidence_requirement": {
+        "type": "source_reference_required",
+        "observed_selector": "$.deadline.evidence_refs"
+      },
+      "on_unevaluable": "fail"
+    },
+    {
+      "assertion_id": "deadline_kind",
+      "type": "deadline_kind_equal",
+      "scorer_ref": "deadline_kind_equal.v1",
+      "observed_selector": "$.deadline.kind",
+      "expected": "explicit_relative",
+      "required": true,
+      "severity": "major",
+      "on_unevaluable": "fail"
+    },
+    {
+      "assertion_id": "risk",
+      "type": "categorical_equal",
+      "scorer_ref": "categorical_equal.v1",
+      "observed_selector": "$.risk_level",
+      "expected": "low",
+      "required": true,
+      "severity": "major",
+      "on_unevaluable": "fail"
+    },
+    {
+      "assertion_id": "missing_information",
+      "type": "set_precision_recall_f1",
+      "scorer_ref": "set_precision_recall_f1.v1",
+      "observed_selector": "$.missing_information[*].key",
+      "expected": [],
+      "params": {},
+      "required": true,
+      "severity": "minor",
+      "on_unevaluable": "fail"
+    },
+    {
+      "assertion_id": "needs_attention",
+      "type": "boolean_equal",
+      "scorer_ref": "boolean_equal.v1",
+      "observed_selector": "$.needs_attention",
+      "expected": false,
+      "required": true,
+      "severity": "major",
+      "on_unevaluable": "fail"
+    }
+  ],
+  "tags": [
+    "deadline",
+    "relative_date",
+    "low_risk",
+    "procurement",
+    "supplies"
+  ],
+  "difficulty": "standard",
+  "criticality": "normal",
+  "ambiguity": {
+    "is_ambiguous": false,
+    "notes": null,
+    "accepted_alternatives": []
+  },
+  "provenance": {
+    "origin": "synthetic",
+    "author_id": "eval_author",
+    "created_at": "2026-08-04T00:00:00Z"
+  },
+  "review": {
+    "status": "approved",
+    "reviewer_id": "domain_reviewer",
+    "reviewed_at": "2026-08-04T00:00:00Z",
+    "rationale": "Received 2026-07-20; 'end of the month' resolves to 2026-07-31. Small routine spend, reversible, low risk; no amount stated so none should be invented."
+  }
+}

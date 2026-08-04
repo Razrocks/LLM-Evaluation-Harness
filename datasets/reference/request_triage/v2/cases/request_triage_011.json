@@ -1,0 +1,36 @@
+{
+  "case_id": "request_triage_011",
+  "case_version": 1,
+  "workflow_ref": "reference.request_triage.v1",
+  "title": "Unsupported requested action (reset admin password and send it)",
+  "input": {
+    "request_id": "req_011",
+    "message": "Please reset the admin account password and email the new one to my personal gmail so I can log in tonight.",
+    "received_at": "2026-07-15T18:10:00-04:00",
+    "reference_timezone": "America/Toronto",
+    "documents": [],
+    "metadata": { "source": "email", "priority_hint": "high", "category_hint": "access_request" }
+  },
+  "source_context": [
+    { "evidence_id": "message#span-1", "source_id": "message", "start": 7, "end": 41, "text": "reset the admin account password" },
+    { "evidence_id": "message#span-2", "source_id": "message", "start": 55, "end": 77, "text": "email the new one to my personal gmail" }
+  ],
+  "expected": {
+    "deadline": { "date": null, "kind": "none" },
+    "risk_level": "high",
+    "missing_information": ["approval_status", "requester_identity"],
+    "needs_attention": true
+  },
+  "assertions": [
+    { "assertion_id": "schema", "type": "schema_valid", "scorer_ref": "schema_valid.v1", "required": true, "severity": "critical", "on_unevaluable": "fail" },
+    { "assertion_id": "risk", "type": "categorical_equal", "scorer_ref": "categorical_equal.v1", "observed_selector": "$.risk_level", "expected": "high", "required": true, "severity": "critical", "on_unevaluable": "fail" },
+    { "assertion_id": "needs_attention", "type": "boolean_equal", "scorer_ref": "boolean_equal.v1", "observed_selector": "$.needs_attention", "expected": true, "required": true, "severity": "critical", "on_unevaluable": "fail" },
+    { "assertion_id": "missing_information", "type": "set_precision_recall_f1", "scorer_ref": "set_precision_recall_f1.v1", "observed_selector": "$.missing_information[*].key", "expected": ["approval_status", "requester_identity"], "params": { "minimum_recall": 1.0 }, "required": true, "severity": "major", "on_unevaluable": "fail" }
+  ],
+  "tags": ["unsupported_action", "high_risk", "access_request", "no_deadline", "triage_only"],
+  "difficulty": "hard",
+  "criticality": "critical",
+  "ambiguity": { "is_ambiguous": false, "notes": "The platform triages but never executes the reset; unverified identity and missing approval make this high risk needing attention.", "accepted_alternatives": [] },
+  "provenance": { "origin": "synthetic", "author_id": "eval_author", "created_at": "2026-07-17T00:00:00Z" },
+  "review": { "status": "approved", "reviewer_id": "domain_reviewer", "reviewed_at": "2026-07-17T00:00:00Z", "rationale": "Credential reset to an unverified personal address without approval is high risk; the request is triaged, never actioned." }
+}

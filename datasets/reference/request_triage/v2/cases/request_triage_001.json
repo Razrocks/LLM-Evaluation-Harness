@@ -1,0 +1,43 @@
+{
+  "case_id": "request_triage_001",
+  "case_version": 1,
+  "workflow_ref": "reference.request_triage.v1",
+  "title": "Explicit Friday deadline with invoice-quote amount conflict",
+  "input": {
+    "request_id": "req_001",
+    "message": "The submitted invoice is above the agreed quote. Please respond by Friday.",
+    "received_at": "2026-07-13T10:00:00-04:00",
+    "reference_timezone": "America/Toronto",
+    "documents": [
+      { "document_id": "quote_001", "document_version": "1", "text": "Approved service total: CAD 3,200.", "content_hash": "sha256:quote001" },
+      { "document_id": "invoice_001", "document_version": "1", "text": "Amount due: CAD 4,800.", "content_hash": "sha256:invoice001" }
+    ],
+    "metadata": { "source": "email", "priority_hint": "high", "category_hint": "invoice_dispute" }
+  },
+  "source_context": [
+    { "evidence_id": "message#span-1", "source_id": "message", "start": 68, "end": 74, "text": "Friday" },
+    { "evidence_id": "quote_001#span-1", "source_id": "quote_001", "start": 24, "end": 33, "text": "CAD 3,200" },
+    { "evidence_id": "invoice_001#span-1", "source_id": "invoice_001", "start": 12, "end": 21, "text": "CAD 4,800" }
+  ],
+  "expected": {
+    "deadline": { "date": "2026-07-17", "kind": "explicit_relative" },
+    "risk_level": "high",
+    "missing_information": ["amount_or_scope_breakdown"],
+    "needs_attention": true
+  },
+  "assertions": [
+    { "assertion_id": "schema", "type": "schema_valid", "scorer_ref": "schema_valid.v1", "required": true, "severity": "critical", "on_unevaluable": "fail" },
+    { "assertion_id": "deadline_date", "type": "normalized_date_equal", "scorer_ref": "normalized_date_equal.v1", "observed_selector": "$.deadline.date", "expected": "2026-07-17", "required": true, "weight": 2.0, "severity": "critical", "pass_threshold": 1.0, "evidence_requirement": { "type": "source_reference_required", "observed_selector": "$.deadline.evidence_refs" }, "on_unevaluable": "fail" },
+    { "assertion_id": "deadline_kind", "type": "deadline_kind_equal", "scorer_ref": "deadline_kind_equal.v1", "observed_selector": "$.deadline.kind", "expected": "explicit_relative", "required": true, "severity": "major", "on_unevaluable": "fail" },
+    { "assertion_id": "risk", "type": "categorical_equal", "scorer_ref": "categorical_equal.v1", "observed_selector": "$.risk_level", "expected": "high", "required": true, "severity": "major", "on_unevaluable": "fail" },
+    { "assertion_id": "missing_information", "type": "set_precision_recall_f1", "scorer_ref": "set_precision_recall_f1.v1", "observed_selector": "$.missing_information[*].key", "expected": ["amount_or_scope_breakdown"], "params": { "minimum_recall": 1.0 }, "required": true, "severity": "major", "on_unevaluable": "fail" },
+    { "assertion_id": "needs_attention", "type": "boolean_equal", "scorer_ref": "boolean_equal.v1", "observed_selector": "$.needs_attention", "expected": true, "required": true, "severity": "major", "on_unevaluable": "fail" },
+    { "assertion_id": "no_invented_amount", "type": "unsupported_material_claim_absent", "scorer_ref": "unsupported_material_claim_absent.v1", "observed_selector": "$.material_claims[*]", "params": { "prohibited": ["unsupported monetary amount"] }, "required": true, "severity": "critical", "on_unevaluable": "fail" }
+  ],
+  "tags": ["deadline", "relative_date", "document_conflict", "high_risk", "amount_conflict"],
+  "difficulty": "standard",
+  "criticality": "critical",
+  "ambiguity": { "is_ambiguous": false, "notes": null, "accepted_alternatives": [] },
+  "provenance": { "origin": "synthetic", "author_id": "eval_author", "created_at": "2026-07-17T00:00:00Z" },
+  "review": { "status": "approved", "reviewer_id": "domain_reviewer", "reviewed_at": "2026-07-17T00:00:00Z", "rationale": "Amounts and Friday deadline verified against source spans; overage unexplained." }
+}

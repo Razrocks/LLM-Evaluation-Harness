@@ -1,0 +1,36 @@
+{
+  "case_id": "request_triage_005",
+  "case_version": 1,
+  "workflow_ref": "reference.request_triage.v1",
+  "title": "Missing account identifier on a billing correction request",
+  "input": {
+    "request_id": "req_005",
+    "message": "There's a duplicate charge on my account this month. Can you reverse it? Please sort it out by Wednesday.",
+    "received_at": "2026-07-13T11:00:00-04:00",
+    "reference_timezone": "America/Toronto",
+    "documents": [],
+    "metadata": { "source": "email", "priority_hint": "medium", "category_hint": "billing" }
+  },
+  "source_context": [
+    { "evidence_id": "message#span-1", "source_id": "message", "start": 86, "end": 95, "text": "Wednesday" }
+  ],
+  "expected": {
+    "deadline": { "date": "2026-07-15", "kind": "explicit_relative" },
+    "risk_level": "medium",
+    "missing_information": ["request_identifier", "amount_or_scope_breakdown"],
+    "needs_attention": true
+  },
+  "assertions": [
+    { "assertion_id": "schema", "type": "schema_valid", "scorer_ref": "schema_valid.v1", "required": true, "severity": "critical", "on_unevaluable": "fail" },
+    { "assertion_id": "deadline_date", "type": "normalized_date_equal", "scorer_ref": "normalized_date_equal.v1", "observed_selector": "$.deadline.date", "expected": "2026-07-15", "required": true, "weight": 2.0, "severity": "critical", "pass_threshold": 1.0, "evidence_requirement": { "type": "source_reference_required", "observed_selector": "$.deadline.evidence_refs" }, "on_unevaluable": "fail" },
+    { "assertion_id": "risk", "type": "categorical_equal", "scorer_ref": "categorical_equal.v1", "observed_selector": "$.risk_level", "expected": "medium", "required": true, "severity": "major", "on_unevaluable": "fail" },
+    { "assertion_id": "missing_information", "type": "set_precision_recall_f1", "scorer_ref": "set_precision_recall_f1.v1", "observed_selector": "$.missing_information[*].key", "expected": ["request_identifier", "amount_or_scope_breakdown"], "params": { "minimum_recall": 1.0 }, "required": true, "severity": "major", "on_unevaluable": "fail" },
+    { "assertion_id": "needs_attention", "type": "boolean_equal", "scorer_ref": "boolean_equal.v1", "observed_selector": "$.needs_attention", "expected": true, "required": true, "severity": "major", "on_unevaluable": "fail" }
+  ],
+  "tags": ["deadline", "relative_date", "missing_information", "medium_risk", "billing"],
+  "difficulty": "standard",
+  "criticality": "normal",
+  "ambiguity": { "is_ambiguous": false, "notes": null, "accepted_alternatives": [] },
+  "provenance": { "origin": "synthetic", "author_id": "eval_author", "created_at": "2026-07-17T00:00:00Z" },
+  "review": { "status": "approved", "reviewer_id": "domain_reviewer", "reviewed_at": "2026-07-17T00:00:00Z", "rationale": "No account id or charge amount provided; both must be flagged missing. Wednesday relative to Mon 2026-07-13 is 2026-07-15." }
+}

@@ -1,0 +1,42 @@
+{
+  "case_id": "request_triage_012",
+  "case_version": 1,
+  "workflow_ref": "reference.request_triage.v1",
+  "title": "Contradictory documents: currency mismatch between contract and invoice",
+  "input": {
+    "request_id": "req_012",
+    "message": "Approving this invoice against the contract — can you confirm the total looks right before I pay it by Monday?",
+    "received_at": "2026-07-15T12:00:00-04:00",
+    "reference_timezone": "America/Toronto",
+    "documents": [
+      { "document_id": "contract_012", "document_version": "2", "text": "Agreed total: USD 5,000.", "content_hash": "sha256:contract012" },
+      { "document_id": "invoice_012", "document_version": "1", "text": "Total due: CAD 5,000.", "content_hash": "sha256:invoice012" }
+    ],
+    "metadata": { "source": "email", "priority_hint": "high", "category_hint": "invoice_dispute" }
+  },
+  "source_context": [
+    { "evidence_id": "message#span-1", "source_id": "message", "start": 92, "end": 98, "text": "Monday" },
+    { "evidence_id": "contract_012#span-1", "source_id": "contract_012", "start": 14, "end": 23, "text": "USD 5,000" },
+    { "evidence_id": "invoice_012#span-1", "source_id": "invoice_012", "start": 11, "end": 20, "text": "CAD 5,000" }
+  ],
+  "expected": {
+    "deadline": { "date": "2026-07-20", "kind": "explicit_relative" },
+    "risk_level": "high",
+    "missing_information": ["amount_or_scope_breakdown"],
+    "needs_attention": true
+  },
+  "assertions": [
+    { "assertion_id": "schema", "type": "schema_valid", "scorer_ref": "schema_valid.v1", "required": true, "severity": "critical", "on_unevaluable": "fail" },
+    { "assertion_id": "deadline_date", "type": "normalized_date_equal", "scorer_ref": "normalized_date_equal.v1", "observed_selector": "$.deadline.date", "expected": "2026-07-20", "required": true, "weight": 2.0, "severity": "critical", "pass_threshold": 1.0, "evidence_requirement": { "type": "source_reference_required", "observed_selector": "$.deadline.evidence_refs" }, "on_unevaluable": "fail" },
+    { "assertion_id": "risk", "type": "categorical_equal", "scorer_ref": "categorical_equal.v1", "observed_selector": "$.risk_level", "expected": "high", "required": true, "severity": "critical", "on_unevaluable": "fail" },
+    { "assertion_id": "needs_attention", "type": "boolean_equal", "scorer_ref": "boolean_equal.v1", "observed_selector": "$.needs_attention", "expected": true, "required": true, "severity": "major", "on_unevaluable": "fail" },
+    { "assertion_id": "missing_information", "type": "set_precision_recall_f1", "scorer_ref": "set_precision_recall_f1.v1", "observed_selector": "$.missing_information[*].key", "expected": ["amount_or_scope_breakdown"], "params": { "minimum_recall": 1.0 }, "required": true, "severity": "major", "on_unevaluable": "fail" },
+    { "assertion_id": "no_invented_amount", "type": "unsupported_material_claim_absent", "scorer_ref": "unsupported_material_claim_absent.v1", "observed_selector": "$.material_claims[*]", "params": { "prohibited": ["a reconciled single-currency total not present in the sources"] }, "required": true, "severity": "critical", "on_unevaluable": "fail" }
+  ],
+  "tags": ["deadline", "relative_date", "document_conflict", "currency_conflict", "high_risk", "grounding"],
+  "difficulty": "hard",
+  "criticality": "critical",
+  "ambiguity": { "is_ambiguous": false, "notes": "USD vs CAD for the same nominal 5,000 is a real conflict; the model must surface it, not silently pick one currency.", "accepted_alternatives": [] },
+  "provenance": { "origin": "synthetic", "author_id": "eval_author", "created_at": "2026-07-17T00:00:00Z" },
+  "review": { "status": "approved", "reviewer_id": "domain_reviewer", "reviewed_at": "2026-07-17T00:00:00Z", "rationale": "Currency mismatch makes the totals non-comparable; high risk, breakdown missing, and no reconciled amount may be invented. Monday relative to 2026-07-15 is 2026-07-20." }
+}
